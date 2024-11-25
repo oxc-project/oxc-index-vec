@@ -5,6 +5,7 @@ include = ["/src"]
 publish = true
 authors = ["Boshen <boshenc@gmail.com>"]
 edition = "2021"
+description = "Newtype-style helpers for `Vec` and `usize`."
 license = "MIT"
 repository = "https://github.com/Boshen/oxc-index-vec"
 rust-version = "1.76" # Support last 6 minor versions.
