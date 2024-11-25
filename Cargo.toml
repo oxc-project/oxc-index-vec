@@ -1,27 +1,82 @@
 [package]
 name = "oxc_index"
 version = "0.37.0"
-authors.workspace = true
-categories.workspace = true
-edition.workspace = true
-homepage.workspace = true
 include = ["/src"]
-keywords.workspace = true
-license.workspace = true
 publish = true
-repository.workspace = true
-rust-version.workspace = true
-description.workspace = true
+authors = ["Boshen <boshenc@gmail.com>"]
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/Boshen/oxc-index-vec"
+rust-version = "1.76" # Support last 6 minor versions.
 
-[lints]
-workspace = true
+# <https://doc.rust-lang.org/rustc/lints/listing/allowed-by-default.html>
+[lints.rust]
+absolute_paths_not_starting_with_crate = "warn"
+non_ascii_idents = "warn"
+unit-bindings = "warn"
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(coverage)', 'cfg(coverage_nightly)'] }
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+empty_docs = { level = "allow", priority = 1 } # From `Tsify`
+# restriction
+dbg_macro = "warn"
+todo = "warn"
+unimplemented = "warn"
+print_stdout = "warn" # Must be opt-in
+print_stderr = "warn" # Must be opt-in
+allow_attributes = "warn"
+# I like the explicitness of this rule as it removes confusion around `clone`.
+# This increases readability, avoids `clone` mindlessly and heap allocating by accident.
+clone_on_ref_ptr = "warn"
+# These two are mutually exclusive, I like `mod.rs` files for better fuzzy searches on module entries.
+self_named_module_files = "warn" # "-Wclippy::mod_module_files"
+empty_drop = "warn"
+empty_structs_with_brackets = "warn"
+exit = "warn"
+filetype_is_file = "warn"
+get_unwrap = "warn"
+impl_trait_in_params = "warn"
+rc_buffer = "warn"
+rc_mutex = "warn"
+rest_pat_in_fully_bound_structs = "warn"
+unnecessary_safety_comment = "warn"
+undocumented_unsafe_blocks = "warn"
+infinite_loop = "warn"
+# I want to write the best Rust code so pedantic is enabled.
+# We should only disable rules globally if they are either false positives, chaotic, or does not make sense.
+pedantic = { level = "warn", priority = -1 }
+# Allowed rules
+# pedantic
+# This rule is too pedantic, I don't want to force this because naming things are hard.
+module_name_repetitions = "allow"
+# All triggers are mostly ignored in our codebase, so this is ignored globally.
+struct_excessive_bools = "allow"
+too_many_lines = "allow"
+# `#[must_use]` is creating too much noise for this codebase, it does not add much value
+# except nagging the programmer to add a `#[must_use]` after clippy has been run.
+# Having `#[must_use]` everywhere also hinders readability.
+must_use_candidate = "allow"
+# Too annoying, we import by name anyway.
+wildcard_imports = "allow"
+# used_underscore_binding= "allow"
+doc_markdown = "allow"
+# nursery
+# `const` functions do not make sense for our project because this is not a `const` library.
+# This rule also confuses newcomers and forces them to add `const` blindlessly without any reason.
+missing_const_for_fn = "allow"
+# cargo
+cargo = { level = "warn", priority = -1 }
+multiple_crate_versions = "allow"
+cargo_common_metadata = "allow" # FIXME
+doc_lazy_continuation = "allow" # FIXME
 
 [lib]
 doctest = false
 
 [dependencies]
-rayon = { workspace = true, optional = true }
-serde = { workspace = true, optional = true }
+rayon = { version = "1", optional = true }
+serde = { version = "1", optional = true }
 
 [features]
 serialize = ["dep:serde"]
