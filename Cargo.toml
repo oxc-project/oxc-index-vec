@@ -1,7 +1,6 @@
 [package]
 name = "oxc_index"
 version = "1.0.0"
-include = ["/src"]
 publish = true
 authors = ["Boshen <boshenc@gmail.com>"]
 edition = "2021"
@@ -11,7 +10,8 @@ categories = ["data-structures", "no-std", "rust-patterns"]
 readme = "README.md"
 license = "MIT"
 repository = "https://github.com/Boshen/oxc-index-vec"
-rust-version = "1.76" # Support last 6 minor versions.
+rust-version = "1.76"
+include = ["/src"]
 
 # <https://doc.rust-lang.org/rustc/lints/listing/allowed-by-default.html>
 [lints.rust]
@@ -81,5 +81,6 @@ rayon = { version = "1", optional = true }
 serde = { version = "1", optional = true }
 
 [features]
+default = []
 serialize = ["dep:serde"]
 rayon = ["dep:rayon"]
