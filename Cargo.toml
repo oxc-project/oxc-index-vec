@@ -9,7 +9,7 @@ keywords = ["newtype", "vec", "index", "indexed", "usize"]
 categories = ["data-structures", "no-std", "rust-patterns"]
 readme = "README.md"
 license = "MIT"
-repository = "https://github.com/Boshen/oxc-index-vec"
+repository = "https://github.com/oxc-project/oxc-index-vec"
 rust-version = "1.76"
 include = ["/src"]
 
