@@ -6,6 +6,9 @@ publish = true
 authors = ["Boshen <boshenc@gmail.com>"]
 edition = "2021"
 description = "Newtype-style helpers for `Vec` and `usize`."
+keywords = ["newtype", "vec", "index", "indexed", "usize"]
+categories = ["data-structures", "no-std", "rust-patterns"]
+readme = "README.md"
 license = "MIT"
 repository = "https://github.com/Boshen/oxc-index-vec"
 rust-version = "1.76" # Support last 6 minor versions.
@@ -69,8 +72,6 @@ missing_const_for_fn = "allow"
 # cargo
 cargo = { level = "warn", priority = -1 }
 multiple_crate_versions = "allow"
-cargo_common_metadata = "allow" # FIXME
-doc_lazy_continuation = "allow" # FIXME
 
 [lib]
 doctest = false
