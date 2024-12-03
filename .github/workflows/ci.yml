@@ -43,7 +43,6 @@ jobs:
       - uses: Boshen/setup-rust@main
         with:
           save-cache: ${{ github.ref_name == 'main' }}
-          components: rustfmt # for `cargo codegen`
       - run: cargo check --all-targets --all-features
       - run: cargo test
 
@@ -55,11 +54,12 @@ jobs:
 
       - uses: Boshen/setup-rust@main
         with:
-          components: clippy rust-docs
+          components: clippy rust-docs rustfmt
 
       - run: |
           cargo clippy --all-targets --all-features -- -D warnings
           RUSTDOCFLAGS='-D warnings' cargo doc --no-deps --document-private-items
+          cargo fmt --check
 
       - uses: crate-ci/typos@master
         with:
