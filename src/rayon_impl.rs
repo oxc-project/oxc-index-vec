@@ -105,7 +105,7 @@ pub struct Drain<'data, T: Send> {
     orig_len: usize,
 }
 
-impl<'data, T: Send> ParallelIterator for Drain<'data, T> {
+impl<T: Send> ParallelIterator for Drain<'_, T> {
     type Item = T;
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
@@ -120,7 +120,7 @@ impl<'data, T: Send> ParallelIterator for Drain<'data, T> {
     }
 }
 
-impl<'data, T: Send> IndexedParallelIterator for Drain<'data, T> {
+impl<T: Send> IndexedParallelIterator for Drain<'_, T> {
     fn drive<C>(self, consumer: C) -> C::Result
     where
         C: Consumer<Self::Item>,
@@ -149,7 +149,7 @@ impl<'data, T: Send> IndexedParallelIterator for Drain<'data, T> {
     }
 }
 
-impl<'data, T: Send> Drop for Drain<'data, T> {
+impl<T: Send> Drop for Drain<'_, T> {
     fn drop(&mut self) {
         let Range { start, end } = self.range;
         if self.vec.len() == self.orig_len {
@@ -173,8 +173,6 @@ impl<'data, T: Send> Drop for Drain<'data, T> {
         }
     }
 }
-
-/// ////////////////////////////////////////////////////////////////////////
 
 pub(crate) struct DrainProducer<'data, T: Send> {
     slice: &'data mut [T],
@@ -228,8 +226,6 @@ impl<'data, T: 'data + Send> Drop for DrainProducer<'data, T> {
         unsafe { ptr::drop_in_place::<[T]>(slice_ptr) };
     }
 }
-
-/// ////////////////////////////////////////////////////////////////////////
 
 // like std::vec::Drain, without updating a source Vec
 pub(crate) struct SliceDrain<'data, T> {
