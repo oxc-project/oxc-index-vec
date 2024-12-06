@@ -4,6 +4,13 @@ All notable changes to this package will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project does not adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) until v1.0.0.
 
+## [1.0.2](https://github.com/oxc-project/oxc-index-vec/compare/v1.0.1...v1.0.2) - 2024-12-06
+
+### Other
+
+- *(deps)* update dependency rust to v1.83.0 ([#2](https://github.com/oxc-project/oxc-index-vec/pull/2))
+- add README
+
 ## [1.0.1](https://github.com/oxc-project/oxc-index-vec/compare/v1.0.0...v1.0.1) - 2024-12-01
 
 ### Fixed
