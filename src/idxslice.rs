@@ -609,7 +609,6 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
     /// This is equivalent to `core::slice::from_raw_parts` and has the same
     /// safety caveats.
     #[inline]
-
     pub unsafe fn from_raw_parts<'a>(data: *const T, len: usize) -> &'a Self {
         Self::new(slice::from_raw_parts(data, len))
     }
@@ -621,7 +620,6 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
     /// This is equivalent to `core::slice::from_raw_parts_mut` and has the same
     /// safety caveats.
     #[inline]
-
     pub unsafe fn from_raw_parts_mut<'a>(data: *mut T, len: usize) -> &'a mut Self {
         Self::new_mut(slice::from_raw_parts_mut(data, len))
     }
