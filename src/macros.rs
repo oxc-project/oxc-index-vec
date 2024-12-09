@@ -178,7 +178,7 @@ macro_rules! unknown_define_index_type_option {
     () => {};
 }
 
-#[cfg(feature = "serialize")]
+#[cfg(feature = "serde")]
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __internal_maybe_index_impl_serde {
@@ -202,7 +202,7 @@ macro_rules! __internal_maybe_index_impl_serde {
     };
 }
 
-#[cfg(not(feature = "serialize"))]
+#[cfg(not(feature = "serde"))]
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __internal_maybe_index_impl_serde {

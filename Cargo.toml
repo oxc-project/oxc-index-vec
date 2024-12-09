@@ -53,8 +53,3 @@ doctest = false
 [dependencies]
 rayon = { version = "1", optional = true }
 serde = { version = "1", optional = true }
-
-[features]
-default = []
-serialize = ["dep:serde"]
-rayon = ["dep:rayon"]
