@@ -97,7 +97,6 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
     /// The resulting vector can be converted back into a box via
     /// `IndexVec<I, T>`'s `into_boxed_slice` method.
     #[inline]
-    #[allow(clippy::wrong_self_convention)]
     pub fn into_vec(self: Box<Self>) -> IndexVec<I, T> {
         // SAFETY: Both the `IndexSlice` and the `IndexVec` are
         // thin wrappers around `[T]` and `Vec<T>` with the added marker for the index.
@@ -610,7 +609,7 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
     /// safety caveats.
     #[inline]
     pub unsafe fn from_raw_parts<'a>(data: *const T, len: usize) -> &'a Self {
-        Self::new(slice::from_raw_parts(data, len))
+        unsafe { Self::new(slice::from_raw_parts(data, len)) }
     }
 
     /// Create a mutable IdxSlice from its pointer and length.
@@ -621,7 +620,7 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
     /// safety caveats.
     #[inline]
     pub unsafe fn from_raw_parts_mut<'a>(data: *mut T, len: usize) -> &'a mut Self {
-        Self::new_mut(slice::from_raw_parts_mut(data, len))
+        unsafe { Self::new_mut(slice::from_raw_parts_mut(data, len)) }
     }
 
     /// Returns the first and all the rest of the elements of the slice, or `None` if it is empty.

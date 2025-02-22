@@ -6,7 +6,7 @@
     clippy::cast_possible_truncation
 )]
 
-use oxc_index::{index_vec, IndexSlice, IndexVec};
+use oxc_index::{IndexSlice, IndexVec, index_vec};
 
 oxc_index::define_index_type! {
     pub struct USize16 = usize;
