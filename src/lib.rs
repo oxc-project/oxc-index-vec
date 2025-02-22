@@ -744,7 +744,7 @@ impl_partialeq2! { IndexSlice<I, [A]>, &'a IndexSlice<J, [B]> }
 impl_partialeq2! { IndexSlice<I, [A]>, &'a mut IndexSlice<J, [B]> }
 
 macro_rules! array_impls {
-    ($($N: expr)+) => {$(
+    ($($N: expr_2021)+) => {$(
         impl_partialeq! { IndexVec<I, A>, [B; $N] }
         impl_partialeq! { IndexVec<I, A>, &'b [B; $N] }
         impl_partialeq! { IndexSlice<I, [A]>, [B; $N] }
@@ -797,7 +797,7 @@ impl<'de, I: Idx, T: serde::de::Deserialize<'de>> serde::de::Deserialize<'de> fo
 }
 
 #[cfg(test)]
-#[allow(clippy::legacy_numeric_constants)]
+#[expect(clippy::legacy_numeric_constants)]
 mod test {
     use super::*;
 

@@ -158,7 +158,7 @@ macro_rules! define_index_type {
     (
         $(#[$attrs:meta])*
         $v:vis struct $type:ident = $raw:ident;
-        $($CONFIG_NAME:ident = $value:expr;)* $(;)?
+        $($CONFIG_NAME:ident = $value:expr_2021;)* $(;)?
     ) => {
         $crate::__define_index_type_inner!{
             @configs [$(($CONFIG_NAME; $value))*]
@@ -214,13 +214,13 @@ macro_rules! __internal_maybe_index_impl_serde {
 macro_rules! __define_index_type_inner {
     // DISABLE_MAX_INDEX_CHECK
     (
-        @configs [(DISABLE_MAX_INDEX_CHECK; $no_check_max:expr) $(($CONFIG_NAME:ident; $value:expr))*]
+        @configs [(DISABLE_MAX_INDEX_CHECK; $no_check_max:expr_2021) $(($CONFIG_NAME:ident; $value:expr_2021))*]
         @attrs [$(#[$attrs:meta])*]
         @derives [$(#[$derive:meta])*]
         @decl [$v:vis struct $type:ident ($raw:ident)]
-        @debug_fmt [$dbg:expr]
-        @max [$max:expr]
-        @no_check_max [$_old_no_check_max:expr]
+        @debug_fmt [$dbg:expr_2021]
+        @max [$max:expr_2021]
+        @no_check_max [$_old_no_check_max:expr_2021]
     ) => {
         $crate::__define_index_type_inner!{
             @configs [$(($CONFIG_NAME; $value))*]
@@ -235,13 +235,13 @@ macro_rules! __define_index_type_inner {
 
     // MAX_INDEX
     (
-        @configs [(MAX_INDEX; $new_max:expr) $(($CONFIG_NAME:ident; $value:expr))*]
+        @configs [(MAX_INDEX; $new_max:expr_2021) $(($CONFIG_NAME:ident; $value:expr_2021))*]
         @attrs [$(#[$attrs:meta])*]
         @derives [$(#[$derive:meta])*]
         @decl [$v:vis struct $type:ident ($raw:ident)]
-        @debug_fmt [$dbg:expr]
-        @max [$max:expr]
-        @no_check_max [$cm:expr]
+        @debug_fmt [$dbg:expr_2021]
+        @max [$max:expr_2021]
+        @no_check_max [$cm:expr_2021]
     ) => {
         $crate::__define_index_type_inner!{
             @configs [$(($CONFIG_NAME; $value))*]
@@ -256,13 +256,13 @@ macro_rules! __define_index_type_inner {
 
     // DEFAULT
     (
-        @configs [(DEFAULT; $default_expr:expr) $(($CONFIG_NAME:ident; $value:expr))*]
+        @configs [(DEFAULT; $default_expr:expr_2021) $(($CONFIG_NAME:ident; $value:expr_2021))*]
         @attrs [$(#[$attrs:meta])*]
         @derives [$(#[$derive:meta])*]
         @decl [$v:vis struct $type:ident ($raw:ident)]
-        @debug_fmt [$dbg:expr]
-        @max [$max:expr]
-        @no_check_max [$no_check_max:expr]
+        @debug_fmt [$dbg:expr_2021]
+        @max [$max:expr_2021]
+        @no_check_max [$no_check_max:expr_2021]
     ) => {
         $crate::__define_index_type_inner!{
             @configs [$(($CONFIG_NAME; $value))*]
@@ -283,13 +283,13 @@ macro_rules! __define_index_type_inner {
 
     // DEBUG_FORMAT
     (
-        @configs [(DEBUG_FORMAT; $dbg:expr) $(($CONFIG_NAME:ident; $value:expr))*]
+        @configs [(DEBUG_FORMAT; $dbg:expr_2021) $(($CONFIG_NAME:ident; $value:expr_2021))*]
         @attrs [$(#[$attrs:meta])*]
         @derives [$(#[$derive:meta])*]
         @decl [$v:vis struct $type:ident ($raw:ident)]
-        @debug_fmt [$old_dbg:expr]
-        @max [$max:expr]
-        @no_check_max [$no_check_max:expr]
+        @debug_fmt [$old_dbg:expr_2021]
+        @max [$max:expr_2021]
+        @no_check_max [$no_check_max:expr_2021]
     ) => {
         $crate::__define_index_type_inner!{
             @configs [$(($CONFIG_NAME; $value))*]
@@ -304,13 +304,13 @@ macro_rules! __define_index_type_inner {
 
     // DISPLAY_FORMAT
     (
-        @configs [(DISPLAY_FORMAT; $format:expr) $(($CONFIG_NAME:ident; $value:expr))*]
+        @configs [(DISPLAY_FORMAT; $format:expr_2021) $(($CONFIG_NAME:ident; $value:expr_2021))*]
         @attrs [$(#[$attrs:meta])*]
         @derives [$(#[$derive:meta])*]
         @decl [$v:vis struct $type:ident ($raw:ident)]
-        @debug_fmt [$dbg:expr]
-        @max [$max:expr]
-        @no_check_max [$no_check_max:expr]
+        @debug_fmt [$dbg:expr_2021]
+        @max [$max:expr_2021]
+        @no_check_max [$no_check_max:expr_2021]
     ) => {
         $crate::__define_index_type_inner!{
             @configs [$(($CONFIG_NAME; $value))*]
@@ -331,13 +331,13 @@ macro_rules! __define_index_type_inner {
 
     // IMPL_RAW_CONVERSIONS
     (
-        @configs [(IMPL_RAW_CONVERSIONS; $val:expr) $(($CONFIG_NAME:ident; $value:expr))*]
+        @configs [(IMPL_RAW_CONVERSIONS; $val:expr_2021) $(($CONFIG_NAME:ident; $value:expr_2021))*]
         @attrs [$(#[$attrs:meta])*]
         @derives [$(#[$derive:meta])*]
         @decl [$v:vis struct $type:ident ($raw:ident)]
-        @debug_fmt [$dbg:expr]
-        @max [$max:expr]
-        @no_check_max [$no_check_max:expr]
+        @debug_fmt [$dbg:expr_2021]
+        @max [$max:expr_2021]
+        @no_check_max [$no_check_max:expr_2021]
     ) => {
         $crate::__define_index_type_inner!{
             @configs [$(($CONFIG_NAME; $value))*]
@@ -367,13 +367,13 @@ macro_rules! __define_index_type_inner {
     };
     // Try to make rust emit a decent error message...
     (
-        @configs [($other:ident; $format:expr) $(($CONFIG_NAME:ident; $value:expr))*]
+        @configs [($other:ident; $format:expr_2021) $(($CONFIG_NAME:ident; $value:expr_2021))*]
         @attrs [$(#[$attrs:meta])*]
         @derives [$(#[$derive:meta])*]
         @decl [$v:vis struct $type:ident ($raw:ident)]
-        @debug_fmt [$dbg:expr]
-        @max [$max:expr]
-        @no_check_max [$no_check_max:expr]
+        @debug_fmt [$dbg:expr_2021]
+        @max [$max:expr_2021]
+        @no_check_max [$no_check_max:expr_2021]
     ) => {
         $crate::unknown_define_index_type_option!($other);
     };
@@ -383,9 +383,9 @@ macro_rules! __define_index_type_inner {
         @attrs [$(#[$attrs:meta])*]
         @derives [$(#[$derive:meta])*]
         @decl [$v:vis struct $type:ident ($raw:ident)]
-        @debug_fmt [$dbg:expr]
-        @max [$max:expr]
-        @no_check_max [$no_check_max:expr]
+        @debug_fmt [$dbg:expr_2021]
+        @max [$max:expr_2021]
+        @no_check_max [$no_check_max:expr_2021]
     ) => {
 
         $(#[$derive])*
@@ -422,7 +422,7 @@ macro_rules! __define_index_type_inner {
             }
 
             /// Construct from a usize without any checks.
-            #[allow(clippy::cast_possible_truncation)]
+            #[expect(clippy::cast_possible_truncation)]
             #[inline(always)]
             $v const fn from_usize_unchecked(value: usize) -> Self {
                 Self { _raw: value as $raw }
@@ -435,7 +435,7 @@ macro_rules! __define_index_type_inner {
             }
 
             /// Construct this index type from a usize.
-            #[allow(clippy::cast_possible_truncation)]
+            #[expect(clippy::cast_possible_truncation)]
             #[inline]
             $v fn from_usize(value: usize) -> Self {
                 Self::check_index(value as usize);
