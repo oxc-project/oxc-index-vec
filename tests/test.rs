@@ -553,22 +553,22 @@ fn test_splits() {
 #[test]
 fn test_get_unchecked() {
     let v: IndexVec<IdxSz, i32> = index_vec![0, 1, 2, 3, 4];
-    
+
     // Test unchecked access for individual elements
     unsafe {
         assert_eq!(*v.get_unchecked(IdxSz::new(0)), 0);
         assert_eq!(*v.get_unchecked(IdxSz::new(2)), 2);
         assert_eq!(*v.get_unchecked(IdxSz::new(4)), 4);
     }
-    
+
     // Test unchecked access for ranges
     unsafe {
         let slice = v.get_unchecked(IdxSz::new(1)..IdxSz::new(4));
         assert_eq!(slice, &[1, 2, 3]);
-        
+
         let slice = v.get_unchecked(IdxSz::new(0)..=IdxSz::new(2));
         assert_eq!(slice, &[0, 1, 2]);
-        
+
         let slice = v.get_unchecked(..);
         assert_eq!(slice, &[0, 1, 2, 3, 4]);
     }
@@ -577,14 +577,14 @@ fn test_get_unchecked() {
 #[test]
 fn test_get_unchecked_mut() {
     let mut v: IndexVec<IdxSz, i32> = index_vec![0, 1, 2, 3, 4];
-    
+
     // Test unchecked mutable access for individual elements
     unsafe {
         *v.get_unchecked_mut(IdxSz::new(0)) = 10;
         *v.get_unchecked_mut(IdxSz::new(2)) = 12;
     }
     assert_eq!(v, [10, 1, 12, 3, 4]);
-    
+
     // Test unchecked mutable access for ranges
     unsafe {
         let slice = v.get_unchecked_mut(IdxSz::new(1)..IdxSz::new(4));
@@ -598,12 +598,12 @@ fn test_get_unchecked_mut() {
 fn test_slice_get_unchecked() {
     let v: IndexVec<IdxSz, i32> = index_vec![0, 1, 2, 3, 4];
     let slice = v.as_slice();
-    
+
     // Test unchecked access on slice
     unsafe {
         assert_eq!(*slice.get_unchecked(IdxSz::new(1)), 1);
         assert_eq!(*slice.get_unchecked(IdxSz::new(3)), 3);
-        
+
         let subslice = slice.get_unchecked(IdxSz::new(1)..IdxSz::new(4));
         assert_eq!(subslice, &[1, 2, 3]);
     }
@@ -612,28 +612,28 @@ fn test_slice_get_unchecked() {
 #[test]
 fn test_push_unchecked() {
     let mut v: IndexVec<IdxSz, i32> = index_vec![0, 1];
-    
+
     // These should be safe because IdxSz is usize and can represent any reasonable vector length
     unsafe {
         let idx = v.push_unchecked(2);
         assert_eq!(idx, IdxSz::new(2));
         assert_eq!(v[idx], 2);
-        
+
         let idx = v.push_unchecked(3);
         assert_eq!(idx, IdxSz::new(3));
         assert_eq!(v[idx], 3);
     }
-    
+
     assert_eq!(v, [0, 1, 2, 3]);
 }
 
 #[test]
 fn test_unchecked_indices() {
     let v: IndexVec<IdxSz, i32> = index_vec![10, 20, 30];
-    
+
     unsafe {
         assert_eq!(v.next_idx_unchecked(), IdxSz::new(3));
-        
+
         let slice = v.as_slice();
         assert_eq!(slice.last_idx_unchecked(), IdxSz::new(2));
     }
@@ -642,19 +642,19 @@ fn test_unchecked_indices() {
 #[test]
 fn test_iterator_optimizations() {
     let v: IndexVec<IdxSz, i32> = index_vec![10, 20, 30];
-    
+
     // Test that enumerated iterators work correctly with unchecked conversions
     let enumerated: Vec<_> = v.iter_enumerated().collect();
     assert_eq!(enumerated, vec![(IdxSz::new(0), &10), (IdxSz::new(1), &20), (IdxSz::new(2), &30)]);
-    
+
     let indices: Vec<_> = v.indices().collect();
     assert_eq!(indices, vec![IdxSz::new(0), IdxSz::new(1), IdxSz::new(2)]);
-    
+
     // Test search methods
     assert_eq!(v.position(|&x| x == 20), Some(IdxSz::new(1)));
     assert_eq!(v.rposition(|&x| x == 30), Some(IdxSz::new(2)));
-    
-    // Test binary search 
+
+    // Test binary search
     let sorted: IndexVec<IdxSz, i32> = index_vec![1, 3, 5, 7, 9];
     assert_eq!(sorted.binary_search(&5), Ok(IdxSz::new(2)));
     assert_eq!(sorted.binary_search(&6), Err(IdxSz::new(3)));

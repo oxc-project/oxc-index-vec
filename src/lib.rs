@@ -330,7 +330,7 @@ impl<I: Idx, T> IndexVec<I, T> {
     ///
     /// # Safety
     ///
-    /// The caller must ensure that `self.len()` is representable by 
+    /// The caller must ensure that `self.len()` is representable by
     /// the index type `I`. This means `self.len()` must be less than
     /// or equal to `I::MAX_INDEX`.
     #[inline]
@@ -457,9 +457,9 @@ impl<I: Idx, T> IndexVec<I, T> {
     }
 
     /// Get a ref to the item at the provided index without bounds checking.
-    /// 
+    ///
     /// # Safety
-    /// 
+    ///
     /// Calling this method with an out-of-bounds index is undefined behavior
     /// even if the resulting reference is not used.
     #[inline]
@@ -469,9 +469,9 @@ impl<I: Idx, T> IndexVec<I, T> {
     }
 
     /// Get a mut ref to the item at the provided index without bounds checking.
-    /// 
+    ///
     /// # Safety
-    /// 
+    ///
     /// Calling this method with an out-of-bounds index is undefined behavior
     /// even if the resulting reference is not used.
     #[inline]

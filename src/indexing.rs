@@ -16,20 +16,20 @@ pub trait IdxSliceIndex<I: Idx, T>: private_slice_index::Sealed {
     fn index(self, slice: &IndexSlice<I, [T]>) -> &Self::Output;
     fn index_mut(self, slice: &mut IndexSlice<I, [T]>) -> &mut Self::Output;
 
-    /// Gets a reference to the output at this location, without 
+    /// Gets a reference to the output at this location, without
     /// performing any bounds checking.
-    /// 
+    ///
     /// # Safety
-    /// 
+    ///
     /// Calling this method with an out-of-bounds index is undefined behavior
     /// even if the resulting reference is not used.
     unsafe fn get_unchecked(self, slice: &IndexSlice<I, [T]>) -> &Self::Output;
 
     /// Gets a mutable reference to the output at this location, without
     /// performing any bounds checking.
-    /// 
+    ///
     /// # Safety
-    /// 
+    ///
     /// Calling this method with an out-of-bounds index is undefined behavior
     /// even if the resulting reference is not used.
     unsafe fn get_unchecked_mut(self, slice: &mut IndexSlice<I, [T]>) -> &mut Self::Output;

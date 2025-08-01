@@ -486,9 +486,9 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
     }
 
     /// Get a ref to the item at the provided index without bounds checking.
-    /// 
+    ///
     /// # Safety
-    /// 
+    ///
     /// Calling this method with an out-of-bounds index is undefined behavior
     /// even if the resulting reference is not used.
     #[inline]
@@ -498,9 +498,9 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
     }
 
     /// Get a mut ref to the item at the provided index without bounds checking.
-    /// 
+    ///
     /// # Safety
-    /// 
+    ///
     /// Calling this method with an out-of-bounds index is undefined behavior
     /// even if the resulting reference is not used.
     #[inline]
