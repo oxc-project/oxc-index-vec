@@ -146,6 +146,19 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
         I::from_usize(self.len() - 1)
     }
 
+    /// Return the index of the last element without bounds checking.
+    ///
+    /// # Safety
+    ///
+    /// The slice must not be empty, and `self.len() - 1` must be
+    /// representable by the index type `I`.
+    #[inline]
+    pub unsafe fn last_idx_unchecked(&self) -> I {
+        debug_assert!(!self.is_empty());
+        // SAFETY: Caller guarantees slice is not empty and index is representable
+        unsafe { I::from_usize_unchecked(self.len() - 1) }
+    }
+
     /// Returns the length of our slice.
     #[inline]
     pub fn len(&self) -> usize {
@@ -186,20 +199,32 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
     /// `usize`.
     #[inline(always)]
     pub fn iter_enumerated(&self) -> Enumerated<slice::Iter<'_, T>, I, &T> {
-        self.raw.iter().enumerate().map(|(i, t)| (I::from_usize(i), t))
+        self.raw.iter().enumerate().map(|(i, t)| {
+            // SAFETY: i comes from enumerate which guarantees 0 <= i < len
+            let idx = unsafe { I::from_usize_unchecked(i) };
+            (idx, t)
+        })
     }
 
     /// Get an iterator over all our indices.
     #[inline(always)]
     pub fn indices(&self) -> iter::Map<Range<usize>, fn(usize) -> I> {
-        (0..self.raw.len()).map(I::from_usize)
+        (0..self.raw.len()).map(|i| {
+            // SAFETY: i is in range 0..len, so it's always valid for the index type
+            // since we can represent at least up to len-1
+            unsafe { I::from_usize_unchecked(i) }
+        })
     }
 
     /// Similar to `self.iter_mut().enumerate()` but with indices of `I` and not
     /// `usize`.
     #[inline(always)]
     pub fn iter_mut_enumerated(&mut self) -> Enumerated<slice::IterMut<'_, T>, I, &mut T> {
-        self.raw.iter_mut().enumerate().map(|(i, t)| (I::from_usize(i), t))
+        self.raw.iter_mut().enumerate().map(|(i, t)| {
+            // SAFETY: i comes from enumerate which guarantees 0 <= i < len
+            let idx = unsafe { I::from_usize_unchecked(i) };
+            (idx, t)
+        })
     }
 
     /// Forwards to the slice's `sort` implementation.
@@ -293,8 +318,9 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
         T: Ord,
     {
         match self.raw.binary_search(value) {
-            Ok(i) => Ok(I::from_usize(i)),
-            Err(i) => Err(I::from_usize(i)),
+            // SAFETY: binary_search only returns indices that are valid for the slice
+            Ok(i) => Ok(unsafe { I::from_usize_unchecked(i) }),
+            Err(i) => Err(unsafe { I::from_usize_unchecked(i) }),
         }
     }
 
@@ -308,8 +334,9 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
         f: F,
     ) -> Result<I, I> {
         match self.raw.binary_search_by(f) {
-            Ok(i) => Ok(I::from_usize(i)),
-            Err(i) => Err(I::from_usize(i)),
+            // SAFETY: binary_search_by only returns indices that are valid for the slice
+            Ok(i) => Ok(unsafe { I::from_usize_unchecked(i) }),
+            Err(i) => Err(unsafe { I::from_usize_unchecked(i) }),
         }
     }
 
@@ -348,8 +375,9 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
         f: F,
     ) -> Result<I, I> {
         match self.raw.binary_search_by_key(b, f) {
-            Ok(i) => Ok(I::from_usize(i)),
-            Err(i) => Err(I::from_usize(i)),
+            // SAFETY: binary_search_by_key only returns indices that are valid for the slice
+            Ok(i) => Ok(unsafe { I::from_usize_unchecked(i) }),
+            Err(i) => Err(unsafe { I::from_usize_unchecked(i) }),
         }
     }
 
@@ -357,7 +385,10 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
     /// equivalent to `Iterator::position`, but returns `I` and not `usize`.
     #[inline(always)]
     pub fn position<F: FnMut(&T) -> bool>(&self, f: F) -> Option<I> {
-        self.raw.iter().position(f).map(I::from_usize)
+        self.raw.iter().position(f).map(|i| {
+            // SAFETY: position only returns valid indices within the slice
+            unsafe { I::from_usize_unchecked(i) }
+        })
     }
 
     /// Searches for an element in an iterator from the right, returning its
@@ -365,7 +396,10 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
     /// not `usize`.
     #[inline(always)]
     pub fn rposition<F: FnMut(&T) -> bool>(&self, f: F) -> Option<I> {
-        self.raw.iter().rposition(f).map(I::from_usize)
+        self.raw.iter().rposition(f).map(|i| {
+            // SAFETY: rposition only returns valid indices within the slice
+            unsafe { I::from_usize_unchecked(i) }
+        })
     }
 
     /// Swaps two elements in our vector.
@@ -449,6 +483,30 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
     #[inline]
     pub fn get_mut<J: IdxSliceIndex<I, T>>(&mut self, index: J) -> Option<&mut J::Output> {
         index.get_mut(self)
+    }
+
+    /// Get a ref to the item at the provided index without bounds checking.
+    /// 
+    /// # Safety
+    /// 
+    /// Calling this method with an out-of-bounds index is undefined behavior
+    /// even if the resulting reference is not used.
+    #[inline]
+    pub unsafe fn get_unchecked<J: IdxSliceIndex<I, T>>(&self, index: J) -> &J::Output {
+        // SAFETY: Safety conditions are passed through to the caller
+        unsafe { index.get_unchecked(self) }
+    }
+
+    /// Get a mut ref to the item at the provided index without bounds checking.
+    /// 
+    /// # Safety
+    /// 
+    /// Calling this method with an out-of-bounds index is undefined behavior
+    /// even if the resulting reference is not used.
+    #[inline]
+    pub unsafe fn get_unchecked_mut<J: IdxSliceIndex<I, T>>(&mut self, index: J) -> &mut J::Output {
+        // SAFETY: Safety conditions are passed through to the caller
+        unsafe { index.get_unchecked_mut(self) }
     }
 
     /// Wraps the underlying slice's `windows` iterator with one that yields
@@ -629,7 +687,10 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
         if self.is_empty() {
             None
         } else {
-            Some((&self[I::from_usize(0)], &self[I::from_usize(1)..]))
+            // SAFETY: We just checked that the slice is not empty
+            Some(unsafe {
+                (self.get_unchecked(I::from_usize(0)), self.get_unchecked(I::from_usize(1)..))
+            })
         }
     }
 
@@ -640,7 +701,8 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
             None
         } else {
             let split = self.split_at_mut(I::from_usize(1));
-            Some((&mut split.0[I::from_usize(0)], split.1))
+            // SAFETY: We just checked that the slice is not empty, so index 0 is valid
+            Some(unsafe { (split.0.get_unchecked_mut(I::from_usize(0)), split.1) })
         }
     }
 
@@ -651,7 +713,8 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
             None
         } else {
             let last = self.last_idx();
-            Some((&self[last], &self[..last]))
+            // SAFETY: last_idx() guarantees valid index when slice is not empty
+            Some(unsafe { (self.get_unchecked(last), self.get_unchecked(..last)) })
         }
     }
 
@@ -663,7 +726,8 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
         } else {
             let last = self.last_idx();
             let split = self.split_at_mut(last);
-            Some((&mut split.1[I::from_usize(0)], split.0))
+            // SAFETY: We know index 0 of the second slice is valid since it contains the last element
+            Some(unsafe { (split.1.get_unchecked_mut(I::from_usize(0)), split.0) })
         }
     }
 }

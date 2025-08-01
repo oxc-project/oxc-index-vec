@@ -188,6 +188,15 @@ pub trait Idx: Copy + 'static + Ord + Debug + Hash {
     /// are free to define what "fit" means as they desire.
     fn from_usize(idx: usize) -> Self;
 
+    /// Construct an Index from a `usize` without bounds checking.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `idx` is representable by this index type.
+    /// This means `idx` must be less than or equal to the maximum value that
+    /// this index type can represent.
+    unsafe fn from_usize_unchecked(idx: usize) -> Self;
+
     /// Get the underlying index. This is equivalent to `Into<usize>`
     fn index(self) -> usize;
 }
@@ -272,7 +281,11 @@ impl<I: Idx, T> IndexVec<I, T> {
     /// not `usize`.
     #[inline(always)]
     pub fn into_iter_enumerated(self) -> Enumerated<vec::IntoIter<T>, I, T> {
-        self.raw.into_iter().enumerate().map(|(i, t)| (I::from_usize(i), t))
+        self.raw.into_iter().enumerate().map(|(i, t)| {
+            // SAFETY: i comes from enumerate which guarantees 0 <= i < len
+            let idx = unsafe { I::from_usize_unchecked(i) };
+            (idx, t)
+        })
     }
 
     /// Creates a splicing iterator that replaces the specified range in the
@@ -298,7 +311,11 @@ impl<I: Idx, T> IndexVec<I, T> {
         &mut self,
         range: R,
     ) -> Enumerated<vec::Drain<'_, T>, I, T> {
-        self.raw.drain(range.into_range()).enumerate().map(|(i, t)| (I::from_usize(i), t))
+        self.raw.drain(range.into_range()).enumerate().map(|(i, t)| {
+            // SAFETY: i comes from enumerate which guarantees 0 <= i < drained_len
+            let idx = unsafe { I::from_usize_unchecked(i) };
+            (idx, t)
+        })
     }
 
     /// Gives the next index that will be assigned when `push` is
@@ -306,6 +323,20 @@ impl<I: Idx, T> IndexVec<I, T> {
     #[inline]
     pub fn next_idx(&self) -> I {
         I::from_usize(self.len())
+    }
+
+    /// Gives the next index that will be assigned when `push` is
+    /// called, without bounds checking.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that `self.len()` is representable by 
+    /// the index type `I`. This means `self.len()` must be less than
+    /// or equal to `I::MAX_INDEX`.
+    #[inline]
+    pub unsafe fn next_idx_unchecked(&self) -> I {
+        // SAFETY: Caller guarantees len is representable by index type
+        unsafe { I::from_usize_unchecked(self.len()) }
     }
 
     /// Get a the storage as a `&[T]`
@@ -337,6 +368,22 @@ impl<I: Idx, T> IndexVec<I, T> {
     #[inline]
     pub fn push(&mut self, d: T) -> I {
         let idx = I::from_usize(self.len());
+        self.raw.push(d);
+        idx
+    }
+
+    /// Push a new item onto the vector without bounds checking, and return its index.
+    /// This can be faster than `push` when you know the resulting index will be valid.
+    ///
+    /// # Safety
+    ///
+    /// The caller must ensure that after pushing, the resulting index will be
+    /// representable by the index type `I`. This means `self.len()` must be
+    /// less than `I::MAX_INDEX`.
+    #[inline]
+    pub unsafe fn push_unchecked(&mut self, d: T) -> I {
+        // SAFETY: Caller guarantees len is less than MAX_INDEX
+        let idx = unsafe { I::from_usize_unchecked(self.len()) };
         self.raw.push(d);
         idx
     }
@@ -407,6 +454,30 @@ impl<I: Idx, T> IndexVec<I, T> {
     #[inline]
     pub fn get_mut<J: IdxSliceIndex<I, T>>(&mut self, index: J) -> Option<&mut J::Output> {
         index.get_mut(self.as_mut_slice())
+    }
+
+    /// Get a ref to the item at the provided index without bounds checking.
+    /// 
+    /// # Safety
+    /// 
+    /// Calling this method with an out-of-bounds index is undefined behavior
+    /// even if the resulting reference is not used.
+    #[inline]
+    pub unsafe fn get_unchecked<J: IdxSliceIndex<I, T>>(&self, index: J) -> &J::Output {
+        // SAFETY: Safety conditions are passed through to the caller
+        unsafe { index.get_unchecked(self.as_slice()) }
+    }
+
+    /// Get a mut ref to the item at the provided index without bounds checking.
+    /// 
+    /// # Safety
+    /// 
+    /// Calling this method with an out-of-bounds index is undefined behavior
+    /// even if the resulting reference is not used.
+    #[inline]
+    pub unsafe fn get_unchecked_mut<J: IdxSliceIndex<I, T>>(&mut self, index: J) -> &mut J::Output {
+        // SAFETY: Safety conditions are passed through to the caller
+        unsafe { index.get_unchecked_mut(self.as_mut_slice()) }
     }
 
     /// Resize ourselves in-place to `new_len`. See [`Vec::resize`].

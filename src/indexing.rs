@@ -15,6 +15,24 @@ pub trait IdxSliceIndex<I: Idx, T>: private_slice_index::Sealed {
 
     fn index(self, slice: &IndexSlice<I, [T]>) -> &Self::Output;
     fn index_mut(self, slice: &mut IndexSlice<I, [T]>) -> &mut Self::Output;
+
+    /// Gets a reference to the output at this location, without 
+    /// performing any bounds checking.
+    /// 
+    /// # Safety
+    /// 
+    /// Calling this method with an out-of-bounds index is undefined behavior
+    /// even if the resulting reference is not used.
+    unsafe fn get_unchecked(self, slice: &IndexSlice<I, [T]>) -> &Self::Output;
+
+    /// Gets a mutable reference to the output at this location, without
+    /// performing any bounds checking.
+    /// 
+    /// # Safety
+    /// 
+    /// Calling this method with an out-of-bounds index is undefined behavior
+    /// even if the resulting reference is not used.
+    unsafe fn get_unchecked_mut(self, slice: &mut IndexSlice<I, [T]>) -> &mut Self::Output;
 }
 
 // Does this defeat the point of sealing?
@@ -42,6 +60,18 @@ impl<I: Idx, T> IdxSliceIndex<I, T> for I {
     fn index_mut(self, slice: &mut IndexSlice<I, [T]>) -> &mut Self::Output {
         &mut slice.raw[self.index()]
     }
+
+    #[inline]
+    unsafe fn get_unchecked(self, slice: &IndexSlice<I, [T]>) -> &Self::Output {
+        // SAFETY: Caller guarantees that the index is in bounds
+        unsafe { slice.raw.get_unchecked(self.index()) }
+    }
+
+    #[inline]
+    unsafe fn get_unchecked_mut(self, slice: &mut IndexSlice<I, [T]>) -> &mut Self::Output {
+        // SAFETY: Caller guarantees that the index is in bounds
+        unsafe { slice.raw.get_unchecked_mut(self.index()) }
+    }
 }
 
 macro_rules! range_slice {
@@ -67,6 +97,24 @@ macro_rules! range_slice {
             #[inline]
             fn index_mut(self, slice: &mut IndexSlice<I, [T]>) -> &mut Self::Output {
                 IndexSlice::new_mut(&mut slice.raw[self.into_range()])
+            }
+
+            #[inline]
+            unsafe fn get_unchecked(self, slice: &IndexSlice<I, [T]>) -> &Self::Output {
+                // SAFETY: Caller guarantees that the range is in bounds
+                unsafe {
+                    let subslice = slice.raw.get_unchecked(self.into_range());
+                    IndexSlice::new(subslice)
+                }
+            }
+
+            #[inline]
+            unsafe fn get_unchecked_mut(self, slice: &mut IndexSlice<I, [T]>) -> &mut Self::Output {
+                // SAFETY: Caller guarantees that the range is in bounds
+                unsafe {
+                    let subslice = slice.raw.get_unchecked_mut(self.into_range());
+                    IndexSlice::new_mut(subslice)
+                }
             }
         }
     };
@@ -105,6 +153,16 @@ impl<I: Idx, T> IdxSliceIndex<I, T> for core::ops::RangeFull {
 
     #[inline]
     fn index_mut(self, slice: &mut IndexSlice<I, [T]>) -> &mut Self::Output {
+        slice
+    }
+
+    #[inline]
+    unsafe fn get_unchecked(self, slice: &IndexSlice<I, [T]>) -> &Self::Output {
+        slice
+    }
+
+    #[inline]
+    unsafe fn get_unchecked_mut(self, slice: &mut IndexSlice<I, [T]>) -> &mut Self::Output {
         slice
     }
 }
