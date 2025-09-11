@@ -1,5 +1,25 @@
 # Changelog
 
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [3.1.0](https://github.com/oxc-project/oxc-index-vec/compare/v3.0.0...v3.1.0) - 2025-09-11
+
+### Added
+
+- implement `rayon::slice::ParallelSlice` / `rayon::slice::ParallelSliceMut` trait ([#72](https://github.com/oxc-project/oxc-index-vec/pull/72))
+
+### Other
+
+- *(deps)* lock file maintenance rust crates ([#61](https://github.com/oxc-project/oxc-index-vec/pull/61))
+- *(deps)* lock file maintenance ([#57](https://github.com/oxc-project/oxc-index-vec/pull/57))
+- *(deps)* update dependency rust to v1.89.0 ([#52](https://github.com/oxc-project/oxc-index-vec/pull/52))
+# Changelog
+
 All notable changes to this package will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project does not adhere to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) until v1.0.0.
