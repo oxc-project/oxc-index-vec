@@ -14,7 +14,7 @@ use rayon::{
         IndexedParallelIterator, IntoParallelIterator, ParallelDrainRange, ParallelIterator,
         plumbing::{Consumer, Producer, ProducerCallback, UnindexedConsumer, bridge},
     },
-    slice::{Iter, IterMut},
+    slice::{Iter, IterMut, ParallelSlice, ParallelSliceMut},
 };
 
 use crate::{Idx, IndexVec};
@@ -94,6 +94,18 @@ impl<'data, I: Idx, T: Send> ParallelDrainRange<usize> for &'data mut IndexVec<I
 
     fn par_drain<R: RangeBounds<usize>>(self, range: R) -> Self::Iter {
         Drain { orig_len: self.len(), range: simplify_range(range, self.len()), vec: &mut self.raw }
+    }
+}
+
+impl<'data, I: Idx, T: Sync> ParallelSlice<T> for &'data IndexVec<I, T> {
+    fn as_parallel_slice(&self) -> &[T] {
+        &self.raw
+    }
+}
+
+impl<'data, I: Idx, T: Send> ParallelSliceMut<T> for &'data mut IndexVec<I, T> {
+    fn as_parallel_slice_mut(&mut self) -> &mut [T] {
+        &mut self.raw
     }
 }
 
