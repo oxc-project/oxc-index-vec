@@ -97,13 +97,13 @@ impl<'data, I: Idx, T: Send> ParallelDrainRange<usize> for &'data mut IndexVec<I
     }
 }
 
-impl<'data, I: Idx, T: Sync> ParallelSlice<T> for &'data IndexVec<I, T> {
+impl<I: Idx, T: Sync> ParallelSlice<T> for &'_ IndexVec<I, T> {
     fn as_parallel_slice(&self) -> &[T] {
         &self.raw
     }
 }
 
-impl<'data, I: Idx, T: Send> ParallelSliceMut<T> for &'data mut IndexVec<I, T> {
+impl<I: Idx, T: Send> ParallelSliceMut<T> for &'_ mut IndexVec<I, T> {
     fn as_parallel_slice_mut(&mut self) -> &mut [T] {
         &mut self.raw
     }
