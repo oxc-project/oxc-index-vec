@@ -6,7 +6,7 @@
     clippy::cast_possible_truncation
 )]
 
-use oxc_index::{IndexSlice, IndexVec, index_vec};
+use oxc_index::{IndexSlice, IndexVec, Idx, index_vec};
 
 oxc_index::define_index_type! {
     pub struct USize16 = usize;
@@ -548,4 +548,74 @@ fn test_splits() {
     assert!(v.split_last().is_none());
     assert!(v.split_first_mut().is_none());
     assert!(v.split_last_mut().is_none());
+}
+
+#[test]
+fn test_push_optimization() {
+    // Test that push works correctly with the optimization
+    let mut v = IndexVec::<Idx32, u32>::new();
+
+    // Test pushing multiple items
+    for i in 0..100 {
+        let idx = v.push(i);
+        assert_eq!(idx.index(), i as usize);
+        assert_eq!(v[idx], i);
+    }
+
+    assert_eq!(v.len(), 100);
+}
+
+#[test]
+fn test_max_capacity() {
+    // Test that max_capacity returns the correct value
+    assert_eq!(IndexVec::<Idx32, u32>::max_capacity(), u32::MAX as usize);
+    assert_eq!(IndexVec::<Idx16, u32>::max_capacity(), u16::MAX as usize);
+    assert_eq!(IndexVec::<Idx8, u32>::max_capacity(), u8::MAX as usize);
+}
+
+#[test]
+fn test_capacity_growth() {
+    // Test that capacity grows correctly without exceeding MAX
+    let mut v = IndexVec::<SmallChecked, u32>::new();
+
+    // Push items and verify capacity grows appropriately
+    for i in 0..50 {
+        v.push(i);
+        assert!(v.raw.capacity() <= IndexVec::<SmallChecked, u32>::max_capacity());
+    }
+}
+
+#[test]
+#[should_panic(expected = "index_vec capacity overflow")]
+fn test_push_beyond_max() {
+    // Test that pushing beyond MAX panics
+    let mut v = IndexVec::<SmallChecked, u32>::new();
+
+    // Fill up to the max
+    for i in 0..=255 {
+        v.push(i);
+    }
+
+    // This should panic
+    v.push(256);
+}
+
+#[test]
+fn test_idx_trait_max() {
+    // Test that the MAX constant is correctly implemented
+    assert_eq!(<Idx32 as Idx>::MAX, u32::MAX as usize);
+    assert_eq!(<Idx16 as Idx>::MAX, u16::MAX as usize);
+    assert_eq!(<Idx8 as Idx>::MAX, u8::MAX as usize);
+    assert_eq!(<SmallChecked as Idx>::MAX, 255);
+    assert_eq!(<SmallCheckedEarly as Idx>::MAX, 0x7f);
+}
+
+#[test]
+fn test_unsafe_from_usize_unchecked() {
+    // Test that unsafe from_usize_unchecked works correctly
+    let idx = unsafe { <Idx32 as Idx>::from_usize_unchecked(42) };
+    assert_eq!(idx.index(), 42);
+
+    let idx = unsafe { <SmallChecked as Idx>::from_usize_unchecked(200) };
+    assert_eq!(idx.index(), 200);
 }

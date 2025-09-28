@@ -181,12 +181,21 @@ mod macros;
 /// the typical cases (E.g. Idx is a newtyped `usize` or `u32`), to become more
 /// complex.
 pub trait Idx: Copy + 'static + Ord + Debug + Hash {
+    /// Maximum valid index value for this index type.
+    const MAX: usize;
+
     /// Construct an Index from a `usize`. This is equivalent to `From<usize>`.
     ///
     /// Note that this will panic if `idx` does not fit (unless checking has
     /// been disabled, as mentioned above). Also note that `Idx` implementations
     /// are free to define what "fit" means as they desire.
     fn from_usize(idx: usize) -> Self;
+
+    /// Construct an Index from a `usize` without bounds checking.
+    ///
+    /// # Safety
+    /// The caller must ensure that `idx` is less than or equal to `Self::MAX`.
+    unsafe fn from_usize_unchecked(idx: usize) -> Self;
 
     /// Get the underlying index. This is equivalent to `Into<usize>`
     fn index(self) -> usize;
@@ -245,6 +254,26 @@ impl<I: Idx, T: fmt::Debug> fmt::Debug for IndexVec<I, T> {
 type Enumerated<Iter, I, T> = iter::Map<iter::Enumerate<Iter>, fn((usize, T)) -> (I, T)>;
 
 impl<I: Idx, T> IndexVec<I, T> {
+    /// Minimum capacity for growth. This avoids excessive allocations for small vectors.
+    const MIN_CAPACITY: usize = if core::mem::size_of::<T>() == 1 {
+        8
+    } else if core::mem::size_of::<T>() <= 1024 {
+        4
+    } else {
+        1
+    };
+
+    /// Maximum capacity that this IndexVec can hold, limited by the index type.
+    #[inline]
+    pub const fn max_capacity() -> usize {
+        // Ensure we never exceed the index type's maximum value
+        if I::MAX < isize::MAX as usize {
+            I::MAX
+        } else {
+            isize::MAX as usize
+        }
+    }
+
     /// Construct a new IndexVec.
     #[inline]
     pub fn new() -> Self {
@@ -333,12 +362,62 @@ impl<I: Idx, T> IndexVec<I, T> {
         &mut self.raw
     }
 
+    /// Calculate the next capacity for growth, ensuring it doesn't exceed MAX.
+    #[inline(never)]
+    #[cold]
+    fn grow_capacity(&self) -> usize {
+        let old_cap = self.raw.capacity();
+        let min_cap = old_cap.saturating_add(1).max(Self::MIN_CAPACITY);
+
+        // Standard growth strategy: double the capacity
+        let new_cap = old_cap.saturating_mul(2).max(min_cap);
+
+        // Ensure we don't exceed the maximum capacity for this index type
+        new_cap.min(Self::max_capacity())
+    }
+
+    /// Reserve capacity for at least one more element, growing if necessary.
+    /// Returns an error if we would exceed the maximum index.
+    #[inline(never)]
+    #[cold]
+    fn grow(&mut self) {
+        let new_cap = self.grow_capacity();
+        let len = self.len();
+
+        // Check if we've hit the maximum capacity
+        if len >= I::MAX {
+            panic!("index_vec capacity overflow: cannot grow beyond {}", I::MAX);
+        }
+
+        // Reserve the calculated capacity
+        self.raw.reserve(new_cap.saturating_sub(self.raw.capacity()));
+    }
+
     /// Push a new item onto the vector, and return it's index.
+    ///
+    /// This optimized version moves bounds checking to the cold path,
+    /// reducing overhead on the hot path.
     #[inline]
     pub fn push(&mut self, d: T) -> I {
-        let idx = I::from_usize(self.len());
-        self.raw.push(d);
-        idx
+        let len = self.len();
+
+        // Fast path: check if we have capacity and haven't exceeded MAX
+        if len < self.raw.capacity() && len < I::MAX {
+            // SAFETY: We just checked that len < I::MAX, so this is safe
+            let idx = unsafe { I::from_usize_unchecked(len) };
+            self.raw.push(d);
+            idx
+        } else {
+            // Slow path: need to grow or we're at the limit
+            if len >= I::MAX {
+                panic!("index_vec capacity overflow: cannot push beyond {}", I::MAX);
+            }
+            self.grow();
+            // SAFETY: We ensured len < I::MAX above
+            let idx = unsafe { I::from_usize_unchecked(len) };
+            self.raw.push(d);
+            idx
+        }
     }
 
     /// Pops the last item off, returning it. See [`Vec::pop`].
