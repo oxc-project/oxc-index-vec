@@ -590,9 +590,11 @@ macro_rules! __define_index_type_inner {
         }
 
         impl $crate::Idx for $type {
+            const MAX: usize = Self::MAX_INDEX;
+
             #[inline]
-            fn from_usize(value: usize) -> Self {
-                Self::from(value)
+            unsafe fn from_usize_unchecked(idx: usize) -> Self {
+                Self::from_usize_unchecked(idx)
             }
 
             #[inline]
