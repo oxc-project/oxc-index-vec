@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0](https://github.com/oxc-project/oxc-index-vec/compare/v3.1.0...v4.0.0) - 2025-09-30
+
+### Added
+
+- add const support to methods where possible ([#87](https://github.com/oxc-project/oxc-index-vec/pull/87))
+- add NonMaxU32 support via define_nonmax_index_type! macro ([#86](https://github.com/oxc-project/oxc-index-vec/pull/86))
+
+### Fixed
+
+- reorder attributes in define_nonmax_index_type! for proc macro compatibility
+
+### Other
+
+- cargo fmt
+- make serde and nonmax optional features
+- make nonmax support always available and use crate's own nonmax
+- make serde support always available and use crate's own serde
+- add documentation to all public methods to fix missing_docs warnings
+- remove backward compatibility alias for define_nonmax_index_type!
+- rename define_nonmax_index_type! to define_nonmax_u32_index_type!
+- apply tuple struct pattern to define_index_type! macro
+- remove #[repr(transparent)] from define_nonmax_index_type!
+- change define_nonmax_index_type! to use tuple struct pattern
+- document custom attribute support in define_nonmax_index_type!
+- remove bounds check from IndexVec::push ([#84](https://github.com/oxc-project/oxc-index-vec/pull/84))
+
 ## [3.1.0](https://github.com/oxc-project/oxc-index-vec/compare/v3.0.0...v3.1.0) - 2025-09-11
 
 ### Added
