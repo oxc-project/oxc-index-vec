@@ -230,7 +230,7 @@ macro_rules! define_nonmax_index_type {
             }
 
             #[inline(always)]
-            $v fn from_raw(value: nonmax::NonMaxU32) -> Self {
+            $v const fn from_raw(value: nonmax::NonMaxU32) -> Self {
                 Self { _raw: value }
             }
 

@@ -271,7 +271,7 @@ type Enumerated<Iter, I, T> = iter::Map<iter::Enumerate<Iter>, fn((usize, T)) ->
 impl<I: Idx, T> IndexVec<I, T> {
     /// Construct a new IndexVec.
     #[inline]
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         IndexVec { raw: Vec::new(), _marker: PhantomData }
     }
 
@@ -346,14 +346,14 @@ impl<I: Idx, T> IndexVec<I, T> {
 
     /// Equivalent to accessing our `raw` field, but as a function.
     #[inline(always)]
-    pub fn as_vec(&self) -> &Vec<T> {
+    pub const fn as_vec(&self) -> &Vec<T> {
         &self.raw
     }
 
     /// Equivalent to accessing our `raw` field mutably, but as a function, if
     /// that's what you'd prefer.
     #[inline(always)]
-    pub fn as_mut_vec(&mut self) -> &mut Vec<T> {
+    pub const fn as_mut_vec(&mut self) -> &mut Vec<T> {
         &mut self.raw
     }
 

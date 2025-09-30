@@ -111,19 +111,19 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
 
     /// Returns the underlying slice.
     #[inline(always)]
-    pub fn as_raw_slice_mut(&mut self) -> &mut [T] {
+    pub const fn as_raw_slice_mut(&mut self) -> &mut [T] {
         &mut self.raw
     }
 
     /// Returns the underlying slice.
     #[inline(always)]
-    pub fn as_raw_slice(&self) -> &[T] {
+    pub const fn as_raw_slice(&self) -> &[T] {
         &self.raw
     }
 
     /// Returns an unsafe mutable pointer to the slice's buffer.
     #[inline]
-    pub fn as_mut_ptr(&mut self) -> *mut T {
+    pub const fn as_mut_ptr(&mut self) -> *mut T {
         self.raw.as_mut_ptr()
     }
 
@@ -131,7 +131,7 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
     ///
     /// # Panics
     #[inline]
-    pub fn as_ptr(&self) -> *const T {
+    pub const fn as_ptr(&self) -> *const T {
         self.raw.as_ptr()
     }
 
@@ -148,7 +148,7 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
 
     /// Returns the length of our slice.
     #[inline]
-    pub fn len(&self) -> usize {
+    pub const fn len(&self) -> usize {
         self.raw.len()
     }
 
@@ -160,7 +160,7 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
 
     /// Returns true if we're empty.
     #[inline]
-    pub fn is_empty(&self) -> bool {
+    pub const fn is_empty(&self) -> bool {
         self.raw.is_empty()
     }
 
@@ -406,7 +406,7 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
 
     /// Return the the last element, if we are not empty.
     #[inline(always)]
-    pub fn last(&self) -> Option<&T> {
+    pub const fn last(&self) -> Option<&T> {
         self.raw.last()
     }
 
@@ -418,7 +418,7 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
 
     /// Return the the first element, if we are not empty.
     #[inline]
-    pub fn first(&self) -> Option<&T> {
+    pub const fn first(&self) -> Option<&T> {
         self.raw.first()
     }
 
