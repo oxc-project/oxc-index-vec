@@ -200,7 +200,7 @@ macro_rules! unknown_define_index_type_option {
 /// ## Usage
 ///
 /// ```rust,ignore
-/// oxc_index::define_nonmax_index_type! {
+/// oxc_index::define_nonmax_u32_index_type! {
 ///     pub struct MyIndex;
 /// }
 /// ```
@@ -214,7 +214,7 @@ macro_rules! unknown_define_index_type_option {
 /// You can add custom attributes, including proc macros, to the generated struct:
 ///
 /// ```rust,ignore
-/// oxc_index::define_nonmax_index_type! {
+/// oxc_index::define_nonmax_u32_index_type! {
 ///     /// Documentation for MyIndex
 ///     #[ast]  // Proc macros work correctly
 ///     #[builder(default)]
@@ -236,7 +236,7 @@ macro_rules! unknown_define_index_type_option {
 /// Do not add `#[derive(Debug)]` or other conflicting derives/impls as they are already provided.
 #[cfg(feature = "nonmax")]
 #[macro_export]
-macro_rules! define_nonmax_index_type {
+macro_rules! define_nonmax_u32_index_type {
     (
         $(#[$attrs:meta])*
         $v:vis struct $type:ident;
@@ -451,6 +451,20 @@ macro_rules! define_nonmax_index_type {
         }
 
         $crate::__internal_maybe_index_impl_serde!($type);
+    };
+}
+
+/// Deprecated alias for `define_nonmax_u32_index_type!`.
+/// Use `define_nonmax_u32_index_type!` instead.
+#[cfg(feature = "nonmax")]
+#[deprecated(
+    since = "3.2.0",
+    note = "Use `define_nonmax_u32_index_type!` instead for clarity"
+)]
+#[macro_export]
+macro_rules! define_nonmax_index_type {
+    ($($tt:tt)*) => {
+        $crate::define_nonmax_u32_index_type!($($tt)*);
     };
 }
 

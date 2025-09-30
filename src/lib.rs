@@ -114,12 +114,12 @@
 //!
 //! #### Does it support NonMaxU32?
 //!
-//! Yes! With the `nonmax` feature enabled, you can use the `define_nonmax_index_type!` macro
+//! Yes! With the `nonmax` feature enabled, you can use the `define_nonmax_u32_index_type!` macro
 //! to create index types backed by `NonMaxU32` from the `nonmax` crate. This is useful for
 //! memory-efficient `Option<Index>` representations.
 //!
 //! ```rust,ignore
-//! oxc_index::define_nonmax_index_type! {
+//! oxc_index::define_nonmax_u32_index_type! {
 //!     pub struct MyIndex;
 //! }
 //! ```

@@ -65,12 +65,12 @@ oxc_index::define_index_type! {
 }
 
 #[cfg(feature = "nonmax")]
-oxc_index::define_nonmax_index_type! {
+oxc_index::define_nonmax_u32_index_type! {
     pub struct IdxNonMax;
 }
 
 #[cfg(feature = "nonmax")]
-oxc_index::define_nonmax_index_type! {
+oxc_index::define_nonmax_u32_index_type! {
     /// Test type with custom attributes
     #[allow(dead_code)]
     #[doc = "Custom documentation"]
@@ -608,7 +608,7 @@ fn test_nonmax_overflow() {
 #[test]
 #[cfg(feature = "nonmax")]
 fn test_nonmax_with_attrs() {
-    // Test that custom attributes work with define_nonmax_index_type!
+    // Test that custom attributes work with define_nonmax_u32_index_type!
     let idx = IdxNonMaxWithAttrs::new(42);
 
     // Verify Debug derive works
