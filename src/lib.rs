@@ -166,7 +166,9 @@ pub use idxslice::{IndexBox, IndexSlice};
 pub use indexing::{IdxRangeBounds, IdxSliceIndex};
 #[cfg(feature = "rayon")]
 pub use rayon_impl::*;
+#[cfg(feature = "serde")]
 pub use serde;
+#[cfg(feature = "nonmax")]
 pub use nonmax;
 #[cfg(feature = "rayon")]
 mod rayon_impl;
@@ -798,24 +800,28 @@ pub fn __max_check_fail(u: usize, max: usize) -> ! {
     panic!("index_vec index overflow: {} is outside the range [0, {})", u, max,)
 }
 
+#[cfg(feature = "serde")]
 impl<I: Idx, T: crate::serde::ser::Serialize> crate::serde::ser::Serialize for IndexVec<I, T> {
     fn serialize<S: crate::serde::ser::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         self.raw.serialize(serializer)
     }
 }
 
+#[cfg(feature = "serde")]
 impl<'de, I: Idx, T: crate::serde::de::Deserialize<'de>> crate::serde::de::Deserialize<'de> for IndexVec<I, T> {
     fn deserialize<D: crate::serde::de::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         Vec::deserialize(deserializer).map(Self::from_vec)
     }
 }
 
+#[cfg(feature = "serde")]
 impl<I: Idx, T: crate::serde::ser::Serialize> crate::serde::ser::Serialize for IndexBox<I, T> {
     fn serialize<S: crate::serde::ser::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         self.raw.serialize(serializer)
     }
 }
 
+#[cfg(feature = "serde")]
 impl<'de, I: Idx, T: crate::serde::de::Deserialize<'de>> crate::serde::de::Deserialize<'de> for IndexBox<I, [T]> {
     fn deserialize<D: crate::serde::de::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         Box::<[T]>::deserialize(deserializer).map(Into::into)

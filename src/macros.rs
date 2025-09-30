@@ -234,6 +234,7 @@ macro_rules! unknown_define_index_type_option {
 /// - Manual implementations: `Debug`, `From<usize>`, `From<MyIndex> for usize`, and arithmetic ops
 ///
 /// Do not add `#[derive(Debug)]` or other conflicting derives/impls as they are already provided.
+#[cfg(feature = "nonmax")]
 #[macro_export]
 macro_rules! define_nonmax_u32_index_type {
     (
@@ -475,6 +476,7 @@ macro_rules! define_nonmax_u32_index_type {
     };
 }
 
+#[cfg(feature = "serde")]
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __internal_maybe_index_impl_serde {
@@ -496,6 +498,13 @@ macro_rules! __internal_maybe_index_impl_serde {
             }
         }
     };
+}
+
+#[cfg(not(feature = "serde"))]
+#[macro_export]
+#[doc(hidden)]
+macro_rules! __internal_maybe_index_impl_serde {
+    ($type:ident) => {};
 }
 
 #[macro_export]
