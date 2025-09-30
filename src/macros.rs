@@ -208,19 +208,28 @@ macro_rules! unknown_define_index_type_option {
 /// This creates an index type backed by `NonMaxU32`, which has the same size as `u32` but
 /// can represent values from `0` to `u32::MAX - 1`.
 ///
-/// ## Custom Attributes
+/// ## Custom Attributes and Proc Macros
 ///
-/// You can add custom attributes to the generated struct by placing them before the struct declaration:
+/// You can add custom attributes, including proc macros, to the generated struct:
 ///
 /// ```rust,ignore
 /// oxc_index::define_nonmax_index_type! {
 ///     /// Documentation for MyIndex
+///     #[ast]  // Proc macros work correctly
+///     #[builder(default)]
 ///     #[allow(dead_code)]
 ///     pub struct MyIndex;
 /// }
 /// ```
 ///
-/// **Note:** The macro automatically provides the following:
+/// **Attribute Ordering:** The macro applies attributes in this order:
+/// 1. Built-in derives: `#[derive(Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]`
+/// 2. Your custom attributes (including proc macros)
+/// 3. `#[repr(transparent)]`
+///
+/// This ordering ensures proc macros can properly process the struct with all standard derives already applied.
+///
+/// **Note:** The macro automatically provides:
 /// - Derives: `Copy`, `Clone`, `PartialEq`, `Eq`, `Hash`, `PartialOrd`, `Ord`
 /// - Manual implementations: `Debug`, `From<usize>`, `From<MyIndex> for usize`, and arithmetic ops
 ///
@@ -233,8 +242,8 @@ macro_rules! define_nonmax_index_type {
         $v:vis struct $type:ident;
         $($CONFIG_NAME:ident = $value:expr_2021;)* $(;)?
     ) => {
-        $(#[$attrs])*
         #[derive(Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+        $(#[$attrs])*
         #[repr(transparent)]
         $v struct $type { _raw: nonmax::NonMaxU32 }
 
