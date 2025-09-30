@@ -247,36 +247,55 @@ macro_rules! define_nonmax_u32_index_type {
         $v struct $type(nonmax::NonMaxU32);
 
         impl $type {
+            /// The maximum representable index value.
             $v const MAX_INDEX: usize = (u32::MAX - 1) as usize;
+
+            /// Whether this index type performs bounds checking.
             $v const CHECKS_MAX_INDEX: bool = true;
 
+            /// Create a new index from a `usize` value.
+            ///
+            /// # Panics
+            /// Panics if `value > MAX_INDEX`.
             #[inline(always)]
             $v const fn new(value: usize) -> Self {
                 Self::from_usize(value)
             }
 
+            /// Create an index from a raw `NonMaxU32` value.
             #[inline(always)]
             $v const fn from_raw(value: nonmax::NonMaxU32) -> Self {
                 Self(value)
             }
 
+            /// Convert an index from another index type.
             #[inline(always)]
             $v fn from_foreign<F: $crate::Idx>(value: F) -> Self {
                 Self::from_usize(value.index())
             }
 
+            /// Create an index from a `usize` without bounds checking.
+            ///
+            /// # Safety
+            /// The caller must ensure `value <= MAX_INDEX`.
             #[inline(always)]
             $v const fn from_usize_unchecked(value: usize) -> Self {
-                // SAFETY: Caller must ensure value is valid
                 Self(unsafe { nonmax::NonMaxU32::new_unchecked(value as u32) })
             }
 
+            /// Create an index from a raw `u32` without bounds checking.
+            ///
+            /// # Safety
+            /// The caller must ensure the value is not `u32::MAX`.
             #[inline(always)]
             $v const fn from_raw_unchecked(raw: u32) -> Self {
-                // SAFETY: Caller must ensure value is valid
                 Self(unsafe { nonmax::NonMaxU32::new_unchecked(raw) })
             }
 
+            /// Create an index from a `usize` with bounds checking.
+            ///
+            /// # Panics
+            /// Panics if `value > MAX_INDEX`.
             #[inline]
             $v const fn from_usize(value: usize) -> Self {
                 Self::check_index(value);
@@ -286,16 +305,19 @@ macro_rules! define_nonmax_u32_index_type {
                 }
             }
 
+            /// Get the index value as a `usize`.
             #[inline(always)]
             $v const fn index(self) -> usize {
                 self.0.get() as usize
             }
 
+            /// Get the raw `NonMaxU32` value.
             #[inline(always)]
             $v const fn raw(self) -> nonmax::NonMaxU32 {
                 self.0
             }
 
+            #[doc(hidden)]
             #[inline]
             $v const fn check_index(v: usize) {
                 if Self::CHECKS_MAX_INDEX && (v > Self::MAX_INDEX) {
@@ -729,7 +751,7 @@ macro_rules! __define_index_type_inner {
                 self.0
             }
 
-            /// Asserts `v <= Self::MAX_INDEX` unless Self::CHECKS_MAX_INDEX is false.
+            #[doc(hidden)]
             #[inline]
             $v const fn check_index(v: usize) {
                 if Self::CHECKS_MAX_INDEX && (v > Self::MAX_INDEX) {
