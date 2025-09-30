@@ -666,8 +666,7 @@ macro_rules! __define_index_type_inner {
 
         $(#[$derive])*
         $(#[$attrs])*
-        #[repr(transparent)]
-        $v struct $type { _raw: $raw }
+        $v struct $type($raw);
 
         impl $type {
             /// If `Self::CHECKS_MAX_INDEX` is true, we'll assert if trying to
@@ -701,13 +700,13 @@ macro_rules! __define_index_type_inner {
             #[expect(clippy::cast_possible_truncation)]
             #[inline(always)]
             $v const fn from_usize_unchecked(value: usize) -> Self {
-                Self { _raw: value as $raw }
+                Self(value as $raw)
             }
 
             /// Construct from the underlying type without any checks.
             #[inline(always)]
             $v const fn from_raw_unchecked(raw: $raw) -> Self {
-                Self { _raw: raw }
+                Self(raw)
             }
 
             /// Construct this index type from a usize.
@@ -715,19 +714,19 @@ macro_rules! __define_index_type_inner {
             #[inline]
             $v const fn from_usize(value: usize) -> Self {
                 Self::check_index(value as usize);
-                Self { _raw: value as $raw }
+                Self(value as $raw)
             }
 
             /// Get the wrapped index as a usize.
             #[inline(always)]
             $v const fn index(self) -> usize {
-                self._raw as usize
+                self.0 as usize
             }
 
             /// Get the wrapped index.
             #[inline(always)]
             $v const fn raw(self) -> $raw {
-                self._raw
+                self.0
             }
 
             /// Asserts `v <= Self::MAX_INDEX` unless Self::CHECKS_MAX_INDEX is false.
