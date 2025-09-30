@@ -476,13 +476,12 @@ macro_rules! define_nonmax_u32_index_type {
     };
 }
 
-#[cfg(feature = "serde")]
 #[macro_export]
 #[doc(hidden)]
 macro_rules! __internal_maybe_index_impl_serde {
     ($type:ident) => {
-        impl serde::ser::Serialize for $type {
-            fn serialize<S: serde::ser::Serializer>(
+        impl $crate::serde::ser::Serialize for $type {
+            fn serialize<S: $crate::serde::ser::Serializer>(
                 &self,
                 serializer: S,
             ) -> Result<S::Ok, S::Error> {
@@ -490,21 +489,14 @@ macro_rules! __internal_maybe_index_impl_serde {
             }
         }
 
-        impl<'de> serde::de::Deserialize<'de> for $type {
-            fn deserialize<D: serde::de::Deserializer<'de>>(
+        impl<'de> $crate::serde::de::Deserialize<'de> for $type {
+            fn deserialize<D: $crate::serde::de::Deserializer<'de>>(
                 deserializer: D,
             ) -> Result<Self, D::Error> {
                 usize::deserialize(deserializer).map(Self::from_usize)
             }
         }
     };
-}
-
-#[cfg(not(feature = "serde"))]
-#[macro_export]
-#[doc(hidden)]
-macro_rules! __internal_maybe_index_impl_serde {
-    ($type:ident) => {};
 }
 
 #[macro_export]

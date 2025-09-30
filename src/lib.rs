@@ -166,6 +166,7 @@ pub use idxslice::{IndexBox, IndexSlice};
 pub use indexing::{IdxRangeBounds, IdxSliceIndex};
 #[cfg(feature = "rayon")]
 pub use rayon_impl::*;
+pub use serde;
 #[cfg(feature = "rayon")]
 mod rayon_impl;
 
@@ -796,30 +797,26 @@ pub fn __max_check_fail(u: usize, max: usize) -> ! {
     panic!("index_vec index overflow: {} is outside the range [0, {})", u, max,)
 }
 
-#[cfg(feature = "serde")]
-impl<I: Idx, T: serde::ser::Serialize> serde::ser::Serialize for IndexVec<I, T> {
-    fn serialize<S: serde::ser::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+impl<I: Idx, T: crate::serde::ser::Serialize> crate::serde::ser::Serialize for IndexVec<I, T> {
+    fn serialize<S: crate::serde::ser::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         self.raw.serialize(serializer)
     }
 }
 
-#[cfg(feature = "serde")]
-impl<'de, I: Idx, T: serde::de::Deserialize<'de>> serde::de::Deserialize<'de> for IndexVec<I, T> {
-    fn deserialize<D: serde::de::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+impl<'de, I: Idx, T: crate::serde::de::Deserialize<'de>> crate::serde::de::Deserialize<'de> for IndexVec<I, T> {
+    fn deserialize<D: crate::serde::de::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         Vec::deserialize(deserializer).map(Self::from_vec)
     }
 }
 
-#[cfg(feature = "serde")]
-impl<I: Idx, T: serde::ser::Serialize> serde::ser::Serialize for IndexBox<I, T> {
-    fn serialize<S: serde::ser::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+impl<I: Idx, T: crate::serde::ser::Serialize> crate::serde::ser::Serialize for IndexBox<I, T> {
+    fn serialize<S: crate::serde::ser::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         self.raw.serialize(serializer)
     }
 }
 
-#[cfg(feature = "serde")]
-impl<'de, I: Idx, T: serde::de::Deserialize<'de>> serde::de::Deserialize<'de> for IndexBox<I, [T]> {
-    fn deserialize<D: serde::de::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+impl<'de, I: Idx, T: crate::serde::de::Deserialize<'de>> crate::serde::de::Deserialize<'de> for IndexBox<I, [T]> {
+    fn deserialize<D: crate::serde::de::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
         Box::<[T]>::deserialize(deserializer).map(Into::into)
     }
 }
