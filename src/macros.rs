@@ -454,20 +454,6 @@ macro_rules! define_nonmax_u32_index_type {
     };
 }
 
-/// Deprecated alias for `define_nonmax_u32_index_type!`.
-/// Use `define_nonmax_u32_index_type!` instead.
-#[cfg(feature = "nonmax")]
-#[deprecated(
-    since = "3.2.0",
-    note = "Use `define_nonmax_u32_index_type!` instead for clarity"
-)]
-#[macro_export]
-macro_rules! define_nonmax_index_type {
-    ($($tt:tt)*) => {
-        $crate::define_nonmax_u32_index_type!($($tt)*);
-    };
-}
-
 #[cfg(feature = "serde")]
 #[macro_export]
 #[doc(hidden)]
