@@ -234,7 +234,6 @@ macro_rules! unknown_define_index_type_option {
 /// - Manual implementations: `Debug`, `From<usize>`, `From<MyIndex> for usize`, and arithmetic ops
 ///
 /// Do not add `#[derive(Debug)]` or other conflicting derives/impls as they are already provided.
-#[cfg(feature = "nonmax")]
 #[macro_export]
 macro_rules! define_nonmax_u32_index_type {
     (
@@ -244,7 +243,7 @@ macro_rules! define_nonmax_u32_index_type {
     ) => {
         #[derive(Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
         $(#[$attrs])*
-        $v struct $type(nonmax::NonMaxU32);
+        $v struct $type($crate::nonmax::NonMaxU32);
 
         impl $type {
             /// The maximum representable index value.
@@ -264,7 +263,7 @@ macro_rules! define_nonmax_u32_index_type {
 
             /// Create an index from a raw `NonMaxU32` value.
             #[inline(always)]
-            $v const fn from_raw(value: nonmax::NonMaxU32) -> Self {
+            $v const fn from_raw(value: $crate::nonmax::NonMaxU32) -> Self {
                 Self(value)
             }
 
@@ -280,7 +279,7 @@ macro_rules! define_nonmax_u32_index_type {
             /// The caller must ensure `value <= MAX_INDEX`.
             #[inline(always)]
             $v const fn from_usize_unchecked(value: usize) -> Self {
-                Self(unsafe { nonmax::NonMaxU32::new_unchecked(value as u32) })
+                Self(unsafe { $crate::nonmax::NonMaxU32::new_unchecked(value as u32) })
             }
 
             /// Create an index from a raw `u32` without bounds checking.
@@ -289,7 +288,7 @@ macro_rules! define_nonmax_u32_index_type {
             /// The caller must ensure the value is not `u32::MAX`.
             #[inline(always)]
             $v const fn from_raw_unchecked(raw: u32) -> Self {
-                Self(unsafe { nonmax::NonMaxU32::new_unchecked(raw) })
+                Self(unsafe { $crate::nonmax::NonMaxU32::new_unchecked(raw) })
             }
 
             /// Create an index from a `usize` with bounds checking.
@@ -299,7 +298,7 @@ macro_rules! define_nonmax_u32_index_type {
             #[inline]
             $v const fn from_usize(value: usize) -> Self {
                 Self::check_index(value);
-                match nonmax::NonMaxU32::new(value as u32) {
+                match $crate::nonmax::NonMaxU32::new(value as u32) {
                     Some(raw) => Self(raw),
                     None => panic!("index_vec index overflow"),
                 }
@@ -313,7 +312,7 @@ macro_rules! define_nonmax_u32_index_type {
 
             /// Get the raw `NonMaxU32` value.
             #[inline(always)]
-            $v const fn raw(self) -> nonmax::NonMaxU32 {
+            $v const fn raw(self) -> $crate::nonmax::NonMaxU32 {
                 self.0
             }
 

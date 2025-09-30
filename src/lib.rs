@@ -167,6 +167,7 @@ pub use indexing::{IdxRangeBounds, IdxSliceIndex};
 #[cfg(feature = "rayon")]
 pub use rayon_impl::*;
 pub use serde;
+pub use nonmax;
 #[cfg(feature = "rayon")]
 mod rayon_impl;
 
