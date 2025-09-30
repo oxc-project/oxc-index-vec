@@ -225,12 +225,12 @@ macro_rules! define_nonmax_index_type {
             $v const CHECKS_MAX_INDEX: bool = true;
 
             #[inline(always)]
-            $v fn new(value: usize) -> Self {
+            $v const fn new(value: usize) -> Self {
                 Self::from_usize(value)
             }
 
             #[inline(always)]
-            $v fn from_raw(value: nonmax::NonMaxU32) -> Self {
+            $v const fn from_raw(value: nonmax::NonMaxU32) -> Self {
                 Self { _raw: value }
             }
 
@@ -252,11 +252,12 @@ macro_rules! define_nonmax_index_type {
             }
 
             #[inline]
-            $v fn from_usize(value: usize) -> Self {
+            $v const fn from_usize(value: usize) -> Self {
                 Self::check_index(value);
-                nonmax::NonMaxU32::new(value as u32)
-                    .map(|raw| Self { _raw: raw })
-                    .unwrap_or_else(|| panic!("index_vec index overflow: {} is outside the range [0, {})", value, Self::MAX_INDEX))
+                match nonmax::NonMaxU32::new(value as u32) {
+                    Some(raw) => Self { _raw: raw },
+                    None => panic!("index_vec index overflow"),
+                }
             }
 
             #[inline(always)]
@@ -270,9 +271,9 @@ macro_rules! define_nonmax_index_type {
             }
 
             #[inline]
-            $v fn check_index(v: usize) {
+            $v const fn check_index(v: usize) {
                 if Self::CHECKS_MAX_INDEX && (v > Self::MAX_INDEX) {
-                    $crate::__max_check_fail(v, Self::MAX_INDEX);
+                    panic!("index_vec index overflow");
                 }
             }
         }
@@ -654,13 +655,13 @@ macro_rules! __define_index_type_inner {
 
             /// Construct this index type from a usize. Alias for `from_usize`.
             #[inline(always)]
-            $v fn new(value: usize) -> Self {
+            $v const fn new(value: usize) -> Self {
                 Self::from_usize(value)
             }
 
             /// Construct this index type from the wrapped integer type.
             #[inline(always)]
-            $v fn from_raw(value: $raw) -> Self {
+            $v const fn from_raw(value: $raw) -> Self {
                 Self::from_usize(value as usize)
             }
 
@@ -686,7 +687,7 @@ macro_rules! __define_index_type_inner {
             /// Construct this index type from a usize.
             #[expect(clippy::cast_possible_truncation)]
             #[inline]
-            $v fn from_usize(value: usize) -> Self {
+            $v const fn from_usize(value: usize) -> Self {
                 Self::check_index(value as usize);
                 Self { _raw: value as $raw }
             }
@@ -705,9 +706,9 @@ macro_rules! __define_index_type_inner {
 
             /// Asserts `v <= Self::MAX_INDEX` unless Self::CHECKS_MAX_INDEX is false.
             #[inline]
-            $v fn check_index(v: usize) {
+            $v const fn check_index(v: usize) {
                 if Self::CHECKS_MAX_INDEX && (v > Self::MAX_INDEX) {
-                    $crate::__max_check_fail(v, Self::MAX_INDEX);
+                    panic!("index_vec index overflow");
                 }
             }
         }
