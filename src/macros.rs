@@ -207,6 +207,24 @@ macro_rules! unknown_define_index_type_option {
 ///
 /// This creates an index type backed by `NonMaxU32`, which has the same size as `u32` but
 /// can represent values from `0` to `u32::MAX - 1`.
+///
+/// ## Custom Attributes
+///
+/// You can add custom attributes to the generated struct by placing them before the struct declaration:
+///
+/// ```rust,ignore
+/// oxc_index::define_nonmax_index_type! {
+///     /// Documentation for MyIndex
+///     #[allow(dead_code)]
+///     pub struct MyIndex;
+/// }
+/// ```
+///
+/// **Note:** The macro automatically provides the following:
+/// - Derives: `Copy`, `Clone`, `PartialEq`, `Eq`, `Hash`, `PartialOrd`, `Ord`
+/// - Manual implementations: `Debug`, `From<usize>`, `From<MyIndex> for usize`, and arithmetic ops
+///
+/// Do not add `#[derive(Debug)]` or other conflicting derives/impls as they are already provided.
 #[cfg(feature = "nonmax")]
 #[macro_export]
 macro_rules! define_nonmax_index_type {

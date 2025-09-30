@@ -69,6 +69,14 @@ oxc_index::define_nonmax_index_type! {
     pub struct IdxNonMax;
 }
 
+#[cfg(feature = "nonmax")]
+oxc_index::define_nonmax_index_type! {
+    /// Test type with custom attributes
+    #[allow(dead_code)]
+    #[doc = "Custom documentation"]
+    pub struct IdxNonMaxWithAttrs;
+}
+
 #[test]
 fn test_idx_default_max() {
     assert_eq!(Idx32::MAX_INDEX, u32::MAX as usize);
@@ -595,4 +603,19 @@ fn test_nonmax() {
 fn test_nonmax_overflow() {
     // This should panic because u32::MAX is not valid for NonMaxU32
     let _ = IdxNonMax::new(u32::MAX as usize);
+}
+
+#[test]
+#[cfg(feature = "nonmax")]
+fn test_nonmax_with_attrs() {
+    // Test that custom attributes work with define_nonmax_index_type!
+    let idx = IdxNonMaxWithAttrs::new(42);
+
+    // Verify Debug derive works
+    let debug_str = format!("{:?}", idx);
+    assert_eq!(debug_str, "42");
+
+    // Verify all standard functionality works
+    assert_eq!(idx.index(), 42);
+    assert_eq!(idx.raw().get(), 42);
 }
