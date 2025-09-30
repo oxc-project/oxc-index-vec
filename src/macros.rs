@@ -205,7 +205,8 @@ macro_rules! unknown_define_index_type_option {
 /// }
 /// ```
 ///
-/// This creates an index type backed by `NonMaxU32`, which has the same size as `u32` but
+/// This creates a tuple struct `pub struct MyIndex(NonMaxU32)` with all the necessary trait
+/// implementations. The type is backed by `NonMaxU32`, which has the same size as `u32` but
 /// can represent values from `0` to `u32::MAX - 1`.
 ///
 /// ## Custom Attributes and Proc Macros
@@ -245,7 +246,7 @@ macro_rules! define_nonmax_index_type {
         #[derive(Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
         $(#[$attrs])*
         #[repr(transparent)]
-        $v struct $type { _raw: nonmax::NonMaxU32 }
+        $v struct $type(nonmax::NonMaxU32);
 
         impl $type {
             $v const MAX_INDEX: usize = (u32::MAX - 1) as usize;
@@ -258,7 +259,7 @@ macro_rules! define_nonmax_index_type {
 
             #[inline(always)]
             $v const fn from_raw(value: nonmax::NonMaxU32) -> Self {
-                Self { _raw: value }
+                Self(value)
             }
 
             #[inline(always)]
@@ -269,32 +270,32 @@ macro_rules! define_nonmax_index_type {
             #[inline(always)]
             $v const fn from_usize_unchecked(value: usize) -> Self {
                 // SAFETY: Caller must ensure value is valid
-                Self { _raw: unsafe { nonmax::NonMaxU32::new_unchecked(value as u32) } }
+                Self(unsafe { nonmax::NonMaxU32::new_unchecked(value as u32) })
             }
 
             #[inline(always)]
             $v const fn from_raw_unchecked(raw: u32) -> Self {
                 // SAFETY: Caller must ensure value is valid
-                Self { _raw: unsafe { nonmax::NonMaxU32::new_unchecked(raw) } }
+                Self(unsafe { nonmax::NonMaxU32::new_unchecked(raw) })
             }
 
             #[inline]
             $v const fn from_usize(value: usize) -> Self {
                 Self::check_index(value);
                 match nonmax::NonMaxU32::new(value as u32) {
-                    Some(raw) => Self { _raw: raw },
+                    Some(raw) => Self(raw),
                     None => panic!("index_vec index overflow"),
                 }
             }
 
             #[inline(always)]
             $v const fn index(self) -> usize {
-                self._raw.get() as usize
+                self.0.get() as usize
             }
 
             #[inline(always)]
             $v const fn raw(self) -> nonmax::NonMaxU32 {
-                self._raw
+                self.0
             }
 
             #[inline]
