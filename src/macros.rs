@@ -226,7 +226,6 @@ macro_rules! unknown_define_index_type_option {
 /// **Attribute Ordering:** The macro applies attributes in this order:
 /// 1. Built-in derives: `#[derive(Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]`
 /// 2. Your custom attributes (including proc macros)
-/// 3. `#[repr(transparent)]`
 ///
 /// This ordering ensures proc macros can properly process the struct with all standard derives already applied.
 ///
@@ -245,7 +244,6 @@ macro_rules! define_nonmax_index_type {
     ) => {
         #[derive(Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
         $(#[$attrs])*
-        #[repr(transparent)]
         $v struct $type(nonmax::NonMaxU32);
 
         impl $type {
