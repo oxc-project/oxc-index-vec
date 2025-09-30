@@ -181,15 +181,28 @@ mod macros;
 /// the typical cases (E.g. Idx is a newtyped `usize` or `u32`), to become more
 /// complex.
 pub trait Idx: Copy + 'static + Ord + Debug + Hash {
+    /// The maximum value that can be represented by this index type.
+    const MAX: usize;
+
+    /// Construct an index from a `usize` without bounds checking.
+    ///
+    /// # Safety
+    /// The caller must ensure that `idx <= Self::MAX`.
+    unsafe fn from_usize_unchecked(idx: usize) -> Self;
+
+    /// Get the underlying index. This is equivalent to `Into<usize>`
+    fn index(self) -> usize;
+
     /// Construct an Index from a `usize`. This is equivalent to `From<usize>`.
     ///
     /// Note that this will panic if `idx` does not fit (unless checking has
     /// been disabled, as mentioned above). Also note that `Idx` implementations
     /// are free to define what "fit" means as they desire.
-    fn from_usize(idx: usize) -> Self;
-
-    /// Get the underlying index. This is equivalent to `Into<usize>`
-    fn index(self) -> usize;
+    fn from_usize(idx: usize) -> Self {
+        assert!(idx <= Self::MAX);
+        // SAFETY: We checked `idx` is valid
+        unsafe { Self::from_usize_unchecked(idx) }
+    }
 }
 
 /// A macro equivalent to the stdlib's `vec![]`, but producing an `IndexVec`.
@@ -336,7 +349,11 @@ impl<I: Idx, T> IndexVec<I, T> {
     /// Push a new item onto the vector, and return it's index.
     #[inline]
     pub fn push(&mut self, d: T) -> I {
-        let idx = I::from_usize(self.len());
+        let len = self.len();
+        // SAFETY: The length of a Vec is always valid for indexing.
+        // If len > I::MAX, the Vec would have panicked on allocation long before this point,
+        // as it cannot allocate more than isize::MAX bytes (and typically much less).
+        let idx = unsafe { I::from_usize_unchecked(len) };
         self.raw.push(d);
         idx
     }
