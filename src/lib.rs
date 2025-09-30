@@ -112,6 +112,18 @@
 //!
 //! Yes, but only if you turn on the `serialize` feature.
 //!
+//! #### Does it support NonMaxU32?
+//!
+//! Yes! With the `nonmax` feature enabled, you can use the `define_nonmax_index_type!` macro
+//! to create index types backed by `NonMaxU32` from the `nonmax` crate. This is useful for
+//! memory-efficient `Option<Index>` representations.
+//!
+//! ```rust,ignore
+//! oxc_index::define_nonmax_index_type! {
+//!     pub struct MyIndex;
+//! }
+//! ```
+//!
 //! #### What features are planned?
 //!
 //! Planned is a bit strong but here are the things I would find useful.
@@ -125,7 +137,6 @@
 //! - Allow use of indices for string types (the primary benefit here would
 //!   probably be the ability to e.g. use u32 without too much pain rather than
 //!   mixing up indices from different strings -- but you never know!)
-//! - Allow index types such as NonZeroU32 and such, if it can be done sanely.
 //! - ...
 //!
 #![allow(clippy::inline_always)]

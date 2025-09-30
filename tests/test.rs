@@ -64,6 +64,11 @@ oxc_index::define_index_type! {
     MAX_INDEX = 0x7f;
 }
 
+#[cfg(feature = "nonmax")]
+oxc_index::define_nonmax_index_type! {
+    pub struct IdxNonMax;
+}
+
 #[test]
 fn test_idx_default_max() {
     assert_eq!(Idx32::MAX_INDEX, u32::MAX as usize);
@@ -548,4 +553,46 @@ fn test_splits() {
     assert!(v.split_last().is_none());
     assert!(v.split_first_mut().is_none());
     assert!(v.split_last_mut().is_none());
+}
+
+#[test]
+#[cfg(feature = "nonmax")]
+fn test_nonmax() {
+    // Test basic construction
+    let idx = IdxNonMax::new(42);
+    assert_eq!(idx.index(), 42);
+
+    // Test from_raw and raw()
+    let raw = nonmax::NonMaxU32::new(100).unwrap();
+    let idx = IdxNonMax::from_raw(raw);
+    assert_eq!(idx.index(), 100);
+    assert_eq!(idx.raw().get(), 100);
+
+    // Test arithmetic
+    let idx1 = IdxNonMax::new(10);
+    let idx2 = idx1 + 5;
+    assert_eq!(idx2.index(), 15);
+
+    let idx3 = idx2 - 3;
+    assert_eq!(idx3.index(), 12);
+
+    // Test with IndexVec
+    let mut vec: IndexVec<IdxNonMax, &str> = index_vec!["a", "b", "c"];
+    assert_eq!(vec.len(), 3);
+
+    let idx = vec.push("d");
+    assert_eq!(vec[idx], "d");
+    assert_eq!(idx.index(), 3);
+
+    // Test max index
+    assert_eq!(IdxNonMax::MAX_INDEX, (u32::MAX - 1) as usize);
+    assert!(IdxNonMax::CHECKS_MAX_INDEX);
+}
+
+#[test]
+#[cfg(feature = "nonmax")]
+#[should_panic]
+fn test_nonmax_overflow() {
+    // This should panic because u32::MAX is not valid for NonMaxU32
+    let _ = IdxNonMax::new(u32::MAX as usize);
 }

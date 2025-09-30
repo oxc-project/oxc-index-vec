@@ -154,7 +154,7 @@
 /// ```
 #[macro_export]
 macro_rules! define_index_type {
-    // public api
+    // public api for primitive types (u8, u16, u32, usize, etc.)
     (
         $(#[$attrs:meta])*
         $v:vis struct $type:ident = $raw:ident;
@@ -170,12 +170,261 @@ macro_rules! define_index_type {
             @no_check_max [false]
         }
     };
+    // public api for complex types (NonMaxU32, etc.) - requires explicit MAX_INDEX
+    (
+        $(#[$attrs:meta])*
+        $v:vis struct $type:ident = $raw:ty;
+        $($CONFIG_NAME:ident = $value:expr_2021;)+ $(;)?
+    ) => {
+        $crate::__define_index_type_inner!{
+            @configs [$(($CONFIG_NAME; $value))*]
+            @attrs [$(#[$attrs])*]
+            @derives [#[derive(Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]]
+            @decl [$v struct $type ($raw)]
+            @debug_fmt ["{}"]
+            @max [(usize::MAX)]
+            @no_check_max [false]
+        }
+    };
 }
 
 #[macro_export]
 #[doc(hidden)]
 macro_rules! unknown_define_index_type_option {
     () => {};
+}
+
+/// Generate the boilerplate for a newtyped index struct using NonMaxU32.
+/// This is a specialized version of `define_index_type!` for use with `NonMaxU32` from the `nonmax` crate.
+///
+/// ## Usage
+///
+/// ```rust,ignore
+/// oxc_index::define_nonmax_index_type! {
+///     pub struct MyIndex;
+/// }
+/// ```
+///
+/// This creates an index type backed by `NonMaxU32`, which has the same size as `u32` but
+/// can represent values from `0` to `u32::MAX - 1`.
+#[cfg(feature = "nonmax")]
+#[macro_export]
+macro_rules! define_nonmax_index_type {
+    (
+        $(#[$attrs:meta])*
+        $v:vis struct $type:ident;
+        $($CONFIG_NAME:ident = $value:expr_2021;)* $(;)?
+    ) => {
+        $(#[$attrs])*
+        #[derive(Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+        #[repr(transparent)]
+        $v struct $type { _raw: nonmax::NonMaxU32 }
+
+        impl $type {
+            $v const MAX_INDEX: usize = (u32::MAX - 1) as usize;
+            $v const CHECKS_MAX_INDEX: bool = true;
+
+            #[inline(always)]
+            $v fn new(value: usize) -> Self {
+                Self::from_usize(value)
+            }
+
+            #[inline(always)]
+            $v fn from_raw(value: nonmax::NonMaxU32) -> Self {
+                Self { _raw: value }
+            }
+
+            #[inline(always)]
+            $v fn from_foreign<F: $crate::Idx>(value: F) -> Self {
+                Self::from_usize(value.index())
+            }
+
+            #[inline(always)]
+            $v const fn from_usize_unchecked(value: usize) -> Self {
+                // SAFETY: Caller must ensure value is valid
+                Self { _raw: unsafe { nonmax::NonMaxU32::new_unchecked(value as u32) } }
+            }
+
+            #[inline(always)]
+            $v const fn from_raw_unchecked(raw: u32) -> Self {
+                // SAFETY: Caller must ensure value is valid
+                Self { _raw: unsafe { nonmax::NonMaxU32::new_unchecked(raw) } }
+            }
+
+            #[inline]
+            $v fn from_usize(value: usize) -> Self {
+                Self::check_index(value);
+                nonmax::NonMaxU32::new(value as u32)
+                    .map(|raw| Self { _raw: raw })
+                    .unwrap_or_else(|| panic!("index_vec index overflow: {} is outside the range [0, {})", value, Self::MAX_INDEX))
+            }
+
+            #[inline(always)]
+            $v const fn index(self) -> usize {
+                self._raw.get() as usize
+            }
+
+            #[inline(always)]
+            $v const fn raw(self) -> nonmax::NonMaxU32 {
+                self._raw
+            }
+
+            #[inline]
+            $v fn check_index(v: usize) {
+                if Self::CHECKS_MAX_INDEX && (v > Self::MAX_INDEX) {
+                    $crate::__max_check_fail(v, Self::MAX_INDEX);
+                }
+            }
+        }
+
+        impl core::fmt::Debug for $type {
+            fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                write!(f, "{}", self.index())
+            }
+        }
+
+        impl core::cmp::PartialOrd<usize> for $type {
+            #[inline]
+            fn partial_cmp(&self, other: &usize) -> Option<core::cmp::Ordering> {
+                self.index().partial_cmp(other)
+            }
+        }
+
+        impl core::cmp::PartialOrd<$type> for usize {
+            #[inline]
+            fn partial_cmp(&self, other: &$type) -> Option<core::cmp::Ordering> {
+                self.partial_cmp(&other.index())
+            }
+        }
+
+        impl PartialEq<usize> for $type {
+            #[inline]
+            fn eq(&self, other: &usize) -> bool {
+                self.index() == *other
+            }
+        }
+
+        impl PartialEq<$type> for usize {
+            #[inline]
+            fn eq(&self, other: &$type) -> bool {
+                *self == other.index()
+            }
+        }
+
+        impl core::ops::Add<usize> for $type {
+            type Output = Self;
+            #[inline]
+            fn add(self, other: usize) -> Self {
+                Self::new(self.index().wrapping_add(other))
+            }
+        }
+
+        impl core::ops::Sub<usize> for $type {
+            type Output = Self;
+            #[inline]
+            fn sub(self, other: usize) -> Self {
+                Self::new(self.index().wrapping_sub(other))
+            }
+        }
+
+        impl core::ops::AddAssign<usize> for $type {
+            #[inline]
+            fn add_assign(&mut self, other: usize) {
+                *self = *self + other
+            }
+        }
+
+        impl core::ops::SubAssign<usize> for $type {
+            #[inline]
+            fn sub_assign(&mut self, other: usize) {
+                *self = *self - other;
+            }
+        }
+
+        impl core::ops::Rem<usize> for $type {
+            type Output = Self;
+            #[inline]
+            fn rem(self, other: usize) -> Self {
+                Self::new(self.index() % other)
+            }
+        }
+
+        impl core::ops::Add<$type> for usize {
+            type Output = $type;
+            #[inline]
+            fn add(self, other: $type) -> $type {
+                other + self
+            }
+        }
+
+        impl core::ops::Sub<$type> for usize {
+            type Output = $type;
+            #[inline]
+            fn sub(self, other: $type) -> $type {
+                $type::new(self.wrapping_sub(other.index()))
+            }
+        }
+
+        impl core::ops::Add for $type {
+            type Output = $type;
+            #[inline]
+            fn add(self, other: $type) -> $type {
+                $type::new(other.index() + self.index())
+            }
+        }
+
+        impl core::ops::Sub for $type {
+            type Output = $type;
+            #[inline]
+            fn sub(self, other: $type) -> $type {
+                $type::new(self.index().wrapping_sub(other.index()))
+            }
+        }
+
+        impl core::ops::AddAssign for $type {
+            #[inline]
+            fn add_assign(&mut self, other: $type) {
+                *self = *self + other
+            }
+        }
+
+        impl core::ops::SubAssign for $type {
+            #[inline]
+            fn sub_assign(&mut self, other: $type) {
+                *self = *self - other;
+            }
+        }
+
+        impl $crate::Idx for $type {
+            const MAX: usize = Self::MAX_INDEX;
+
+            #[inline]
+            unsafe fn from_usize_unchecked(idx: usize) -> Self {
+                Self::from_usize_unchecked(idx)
+            }
+
+            #[inline]
+            fn index(self) -> usize {
+                usize::from(self)
+            }
+        }
+
+        impl From<$type> for usize {
+            #[inline]
+            fn from(v: $type) -> usize {
+                v.index()
+            }
+        }
+
+        impl From<usize> for $type {
+            #[inline]
+            fn from(value: usize) -> Self {
+                $type::from_usize(value)
+            }
+        }
+
+        $crate::__internal_maybe_index_impl_serde!($type);
+    };
 }
 
 #[cfg(feature = "serde")]
@@ -217,7 +466,7 @@ macro_rules! __define_index_type_inner {
         @configs [(DISABLE_MAX_INDEX_CHECK; $no_check_max:expr_2021) $(($CONFIG_NAME:ident; $value:expr_2021))*]
         @attrs [$(#[$attrs:meta])*]
         @derives [$(#[$derive:meta])*]
-        @decl [$v:vis struct $type:ident ($raw:ident)]
+        @decl [$v:vis struct $type:ident ($raw:ty)]
         @debug_fmt [$dbg:expr_2021]
         @max [$max:expr_2021]
         @no_check_max [$_old_no_check_max:expr_2021]
@@ -238,7 +487,7 @@ macro_rules! __define_index_type_inner {
         @configs [(MAX_INDEX; $new_max:expr_2021) $(($CONFIG_NAME:ident; $value:expr_2021))*]
         @attrs [$(#[$attrs:meta])*]
         @derives [$(#[$derive:meta])*]
-        @decl [$v:vis struct $type:ident ($raw:ident)]
+        @decl [$v:vis struct $type:ident ($raw:ty)]
         @debug_fmt [$dbg:expr_2021]
         @max [$max:expr_2021]
         @no_check_max [$cm:expr_2021]
@@ -259,7 +508,7 @@ macro_rules! __define_index_type_inner {
         @configs [(DEFAULT; $default_expr:expr_2021) $(($CONFIG_NAME:ident; $value:expr_2021))*]
         @attrs [$(#[$attrs:meta])*]
         @derives [$(#[$derive:meta])*]
-        @decl [$v:vis struct $type:ident ($raw:ident)]
+        @decl [$v:vis struct $type:ident ($raw:ty)]
         @debug_fmt [$dbg:expr_2021]
         @max [$max:expr_2021]
         @no_check_max [$no_check_max:expr_2021]
@@ -286,7 +535,7 @@ macro_rules! __define_index_type_inner {
         @configs [(DEBUG_FORMAT; $dbg:expr_2021) $(($CONFIG_NAME:ident; $value:expr_2021))*]
         @attrs [$(#[$attrs:meta])*]
         @derives [$(#[$derive:meta])*]
-        @decl [$v:vis struct $type:ident ($raw:ident)]
+        @decl [$v:vis struct $type:ident ($raw:ty)]
         @debug_fmt [$old_dbg:expr_2021]
         @max [$max:expr_2021]
         @no_check_max [$no_check_max:expr_2021]
@@ -307,7 +556,7 @@ macro_rules! __define_index_type_inner {
         @configs [(DISPLAY_FORMAT; $format:expr_2021) $(($CONFIG_NAME:ident; $value:expr_2021))*]
         @attrs [$(#[$attrs:meta])*]
         @derives [$(#[$derive:meta])*]
-        @decl [$v:vis struct $type:ident ($raw:ident)]
+        @decl [$v:vis struct $type:ident ($raw:ty)]
         @debug_fmt [$dbg:expr_2021]
         @max [$max:expr_2021]
         @no_check_max [$no_check_max:expr_2021]
@@ -334,7 +583,7 @@ macro_rules! __define_index_type_inner {
         @configs [(IMPL_RAW_CONVERSIONS; $val:expr_2021) $(($CONFIG_NAME:ident; $value:expr_2021))*]
         @attrs [$(#[$attrs:meta])*]
         @derives [$(#[$derive:meta])*]
-        @decl [$v:vis struct $type:ident ($raw:ident)]
+        @decl [$v:vis struct $type:ident ($raw:ty)]
         @debug_fmt [$dbg:expr_2021]
         @max [$max:expr_2021]
         @no_check_max [$no_check_max:expr_2021]
@@ -370,7 +619,7 @@ macro_rules! __define_index_type_inner {
         @configs [($other:ident; $format:expr_2021) $(($CONFIG_NAME:ident; $value:expr_2021))*]
         @attrs [$(#[$attrs:meta])*]
         @derives [$(#[$derive:meta])*]
-        @decl [$v:vis struct $type:ident ($raw:ident)]
+        @decl [$v:vis struct $type:ident ($raw:ty)]
         @debug_fmt [$dbg:expr_2021]
         @max [$max:expr_2021]
         @no_check_max [$no_check_max:expr_2021]
@@ -382,7 +631,7 @@ macro_rules! __define_index_type_inner {
         @configs []
         @attrs [$(#[$attrs:meta])*]
         @derives [$(#[$derive:meta])*]
-        @decl [$v:vis struct $type:ident ($raw:ident)]
+        @decl [$v:vis struct $type:ident ($raw:ty)]
         @debug_fmt [$dbg:expr_2021]
         @max [$max:expr_2021]
         @no_check_max [$no_check_max:expr_2021]
@@ -461,8 +710,6 @@ macro_rules! __define_index_type_inner {
                     $crate::__max_check_fail(v, Self::MAX_INDEX);
                 }
             }
-
-            const _ENSURE_RAW_IS_UNSIGNED: [(); 0] = [(); <$raw>::MIN as usize];
         }
 
         impl core::fmt::Debug for $type {
