@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.1.0](https://github.com/oxc-project/oxc-index-vec/compare/v4.0.0...v4.1.0) - 2025-10-04
+
+### Added
+
+- improve Debug output for index types ([#92](https://github.com/oxc-project/oxc-index-vec/pull/92))
+
+### Other
+
+- update README with new features and usage examples
+
 ## [4.0.0](https://github.com/oxc-project/oxc-index-vec/compare/v3.1.0...v4.0.0) - 2025-09-30
 
 ### Added
