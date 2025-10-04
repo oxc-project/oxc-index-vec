@@ -611,9 +611,9 @@ fn test_nonmax_with_attrs() {
     // Test that custom attributes work with define_nonmax_u32_index_type!
     let idx = IdxNonMaxWithAttrs::new(42);
 
-    // Verify Debug derive works
+    // Verify Debug impl works
     let debug_str = format!("{:?}", idx);
-    assert_eq!(debug_str, "42");
+    assert_eq!(debug_str, "IdxNonMaxWithAttrs(42)");
 
     // Verify all standard functionality works
     assert_eq!(idx.index(), 42);

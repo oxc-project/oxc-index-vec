@@ -328,7 +328,7 @@ macro_rules! define_nonmax_u32_index_type {
 
         impl core::fmt::Debug for $type {
             fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                write!(f, "{}", self.index())
+                write!(f, "{}({})", stringify!($type), self.index())
             }
         }
 
