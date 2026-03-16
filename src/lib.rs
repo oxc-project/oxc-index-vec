@@ -42,7 +42,7 @@
 //!
 //! // The slice APIs are wrapped as well.
 //! let s: &IndexSlice<StrIdx, [&'static str]> = &strs[StrIdx::new(1)..];
-//! assert_eq!(s[0], "bar");
+//! assert_eq!(s[StrIdx::new(0)], "bar");
 //!
 //! // Indices are mostly interoperable with `usize`, and support
 //! // a lot of what you might want to do to an index.
