@@ -47,9 +47,6 @@ unnecessary_safety_comment = "warn"
 infinite_loop = "warn"
 undocumented_unsafe_blocks = "allow"
 
-[lib]
-doctest = false
-
 [dependencies]
 rayon = { version = "1", optional = true }
 serde = { version = "1", optional = true }
