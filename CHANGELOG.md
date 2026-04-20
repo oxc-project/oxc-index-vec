@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.1.1](https://github.com/oxc-project/oxc-index-vec/compare/v4.1.0...v4.1.1) - 2026-04-20
+
+### Other
+
+- *(deps)* update rust crate rayon to v1.12.0 ([#164](https://github.com/oxc-project/oxc-index-vec/pull/164))
+- apply cargo shear --fix ([#151](https://github.com/oxc-project/oxc-index-vec/pull/151))
+
 ## [4.1.0](https://github.com/oxc-project/oxc-index-vec/compare/v4.0.0...v4.1.0) - 2025-10-04
 
 ### Added
