@@ -201,7 +201,7 @@ pub trait Idx: Copy + 'static + Ord + Debug + Hash {
 
     /// Construct an index from a `usize` without bounds checking.
     ///
-    /// # Safety
+    /// # SAFETY
     /// The caller must ensure that `idx <= Self::MAX`.
     unsafe fn from_usize_unchecked(idx: usize) -> Self;
 

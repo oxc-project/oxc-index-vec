@@ -603,7 +603,7 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
 
     /// Create a IdxSlice from its pointer and length.
     ///
-    /// # Safety
+    /// # SAFETY
     ///
     /// This is equivalent to `core::slice::from_raw_parts` and has the same
     /// safety caveats.
@@ -614,7 +614,7 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
 
     /// Create a mutable IdxSlice from its pointer and length.
     ///
-    /// # Safety
+    /// # SAFETY
     ///
     /// This is equivalent to `core::slice::from_raw_parts_mut` and has the same
     /// safety caveats.

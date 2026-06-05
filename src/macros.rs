@@ -276,7 +276,7 @@ macro_rules! define_nonmax_u32_index_type {
 
             /// Create an index from a `usize` without bounds checking.
             ///
-            /// # Safety
+            /// # SAFETY
             /// The caller must ensure `value < (u32::MAX as usize)`.
             #[inline(always)]
             $v const unsafe fn from_usize_unchecked(value: usize) -> Self {
@@ -285,7 +285,7 @@ macro_rules! define_nonmax_u32_index_type {
 
             /// Create an index from a raw `u32` without bounds checking.
             ///
-            /// # Safety
+            /// # SAFETY
             /// The caller must ensure the value is not `u32::MAX`.
             #[inline(always)]
             $v const unsafe fn from_raw_unchecked(raw: u32) -> Self {
