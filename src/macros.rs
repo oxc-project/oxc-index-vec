@@ -277,9 +277,9 @@ macro_rules! define_nonmax_u32_index_type {
             /// Create an index from a `usize` without bounds checking.
             ///
             /// # Safety
-            /// The caller must ensure `value <= MAX_INDEX`.
+            /// The caller must ensure `value < (u32::MAX as usize)`.
             #[inline(always)]
-            $v const fn from_usize_unchecked(value: usize) -> Self {
+            $v const unsafe fn from_usize_unchecked(value: usize) -> Self {
                 Self(unsafe { $crate::nonmax::NonMaxU32::new_unchecked(value as u32) })
             }
 
@@ -288,7 +288,7 @@ macro_rules! define_nonmax_u32_index_type {
             /// # Safety
             /// The caller must ensure the value is not `u32::MAX`.
             #[inline(always)]
-            $v const fn from_raw_unchecked(raw: u32) -> Self {
+            $v const unsafe fn from_raw_unchecked(raw: u32) -> Self {
                 Self(unsafe { $crate::nonmax::NonMaxU32::new_unchecked(raw) })
             }
 
@@ -449,7 +449,7 @@ macro_rules! define_nonmax_u32_index_type {
 
             #[inline]
             unsafe fn from_usize_unchecked(idx: usize) -> Self {
-                Self::from_usize_unchecked(idx)
+                unsafe { Self::from_usize_unchecked(idx) }
             }
 
             #[inline]
