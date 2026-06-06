@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.0.0](https://github.com/oxc-project/oxc-index-vec/compare/v4.1.0...v5.0.0) - 2026-06-05
+
+### Fixed
+
+- [**breaking**] `define_nonmax_u32_index_type!` macro make `from_usize_unchecked` and `from_raw_unchecked` unsafe methods ([#179](https://github.com/oxc-project/oxc-index-vec/pull/179))
+
+### Other
+
+- capitalize `SAFETY` comments ([#180](https://github.com/oxc-project/oxc-index-vec/pull/180))
+- *(deps)* update rust crate rayon to v1.12.0 ([#164](https://github.com/oxc-project/oxc-index-vec/pull/164))
+- apply cargo shear --fix ([#151](https://github.com/oxc-project/oxc-index-vec/pull/151))
+
 ## [4.1.0](https://github.com/oxc-project/oxc-index-vec/compare/v4.0.0...v4.1.0) - 2025-10-04
 
 ### Added
