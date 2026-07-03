@@ -99,12 +99,6 @@ Compared to the original `index_vec`:
 * **Const support** - Many methods are now `const fn` where possible
 * **Proc macro compatibility** - Macros work seamlessly with custom derive attributes like `#[ast]`, `#[estree(skip)]`, etc.
 
-<p align="center">
-  <a href="https://github.com/sponsors/Boshen">
-    <img src="https://raw.githubusercontent.com/Boshen/sponsors/main/sponsors.svg" alt="My sponsors" />
-  </a>
-</p>
-
 [discord-badge]: https://img.shields.io/discord/1079625926024900739?logo=discord&label=Discord
 [discord-url]: https://discord.gg/9uXCAwqQZW
 [license-badge]: https://img.shields.io/badge/license-MIT-blue.svg
@@ -121,3 +115,11 @@ Compared to the original `index_vec`:
 [crates-url]: https://crates.io/crates/oxc_index
 [docs-badge]: https://img.shields.io/docsrs/oxc_index
 [docs-url]: https://docs.rs/oxc_index
+
+## ❤ Who's [Sponsoring Oxc](https://github.com/sponsors/Boshen)?
+
+<p align="center">
+  <a href="https://github.com/sponsors/Boshen">
+    <img src="https://raw.githubusercontent.com/Boshen/sponsors/main/sponsors.svg" alt="Our sponsors" />
+  </a>
+</p>
