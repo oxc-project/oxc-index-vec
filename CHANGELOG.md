@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.0.1](https://github.com/oxc-project/oxc-index-vec/compare/v5.0.0...v5.0.1) - 2026-07-22
+
+### Fixed
+
+- include upstream license files ([#192](https://github.com/oxc-project/oxc-index-vec/pull/192))
+
+### Other
+
+- *(deps)* update rust crate serde to v1.0.229 ([#196](https://github.com/oxc-project/oxc-index-vec/pull/196))
+- update sponsor section ([#194](https://github.com/oxc-project/oxc-index-vec/pull/194))
+- normalize README sponsor section ([#187](https://github.com/oxc-project/oxc-index-vec/pull/187))
+
 ## [5.0.0](https://github.com/oxc-project/oxc-index-vec/compare/v4.1.0...v5.0.0) - 2026-06-05
 
 ### Fixed
