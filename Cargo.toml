@@ -56,3 +56,9 @@ nonmax = { version = "0.5", optional = true }
 rayon = ["dep:rayon"]
 serde = ["dep:serde"]
 nonmax = ["dep:nonmax"]
+
+[profile.dev]
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+debug = false
