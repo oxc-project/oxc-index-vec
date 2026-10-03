@@ -52,7 +52,7 @@
 ///
 /// Assert if anything tries to construct an index above that value.
 ///
-/// By default, this is `$raw_type::max_value() as usize`, e.g. we check that
+/// By default, this is `$raw_type::MAX as usize`, e.g. we check that
 /// our cast from `usize` to our wrapper is lossless, but we assume any all
 /// instance of `$raw_type` is valid in this index domain.
 ///
@@ -85,12 +85,12 @@
 /// ```rust,no_run
 /// oxc_index::define_index_type! {
 ///     pub struct MyIdx = u16;
-///     MAX_INDEX = (u16::max_value() - 1) as usize;
+///     MAX_INDEX = (u16::MAX - 1) as usize;
 ///     // Set the default index to be an invalid index, as
 ///     // a hacky way of having this type behave somewhat
 ///     // like it were an Option<MyIdx> without consuming
 ///     // extra space.
-///     DEFAULT = (MyIdx::from_raw_unchecked(u16::max_value()));
+///     DEFAULT = (MyIdx::from_raw_unchecked(u16::MAX));
 /// }
 /// ```
 ///
@@ -166,7 +166,7 @@ macro_rules! define_index_type {
             @derives [#[derive(Copy, Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]]
             @decl [$v struct $type ($raw)]
             @debug_fmt ["{}"]
-            @max [(<$raw>::max_value() as usize)]
+            @max [(<$raw>::MAX as usize)]
             @no_check_max [false]
         }
     };

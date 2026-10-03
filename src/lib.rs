@@ -16,11 +16,11 @@
 //!     // you customize things quite a bit:
 //!
 //!     // By default, creating a StrIdx would check an incoming `usize against
-//!     // `u32::max_value()`, as u32 is the wrapped index type. Lets imagine that
+//!     // `u32::MAX`, as u32 is the wrapped index type. Lets imagine that
 //!     // StrIdx has to interface with an external system that uses signed ints.
-//!     // We can change the checking behavior to complain on i32::max_value()
+//!     // We can change the checking behavior to complain on i32::MAX
 //!     // instead:
-//!     MAX_INDEX = i32::max_value() as usize;
+//!     MAX_INDEX = i32::MAX as usize;
 //!
 //!     // We can also disable checking all-together if we are more concerned with perf
 //!     // than any overflow problems, or even do so, but only for debug builds: Quite
@@ -843,7 +843,6 @@ impl<'de, I: Idx, T: crate::serde::de::Deserialize<'de>> crate::serde::de::Deser
 }
 
 #[cfg(test)]
-#[expect(clippy::legacy_numeric_constants)]
 mod test {
     use super::*;
 
