@@ -272,6 +272,27 @@ impl<I: Idx, T: fmt::Debug> fmt::Debug for IndexVec<I, T> {
 }
 type Enumerated<Iter, I, T> = iter::Map<iter::Enumerate<Iter>, fn((usize, T)) -> (I, T)>;
 
+/// Assert that every position in `0..len` is representable by `I`.
+///
+/// Doing this once up front lets iterators that yield indices convert each
+/// position with [`Idx::from_usize_unchecked`], which keeps the bounds check
+/// out of the loop body.
+#[inline(always)]
+pub(crate) fn assert_indexable<I: Idx>(len: usize) {
+    assert!(len == 0 || len - 1 <= I::MAX);
+}
+
+/// Convert an enumerated position into an index.
+///
+/// Must only be used on iterators whose length was validated with
+/// [`assert_indexable`].
+#[inline(always)]
+pub(crate) fn enumerated_unchecked<I: Idx, T>((i, t): (usize, T)) -> (I, T) {
+    // SAFETY: Callers validate the iterator length with `assert_indexable`,
+    // and `i` is always less than that length.
+    (unsafe { I::from_usize_unchecked(i) }, t)
+}
+
 impl<I: Idx, T> IndexVec<I, T> {
     /// Construct a new IndexVec.
     #[inline]
@@ -300,7 +321,8 @@ impl<I: Idx, T> IndexVec<I, T> {
     /// not `usize`.
     #[inline(always)]
     pub fn into_iter_enumerated(self) -> Enumerated<vec::IntoIter<T>, I, T> {
-        self.raw.into_iter().enumerate().map(|(i, t)| (I::from_usize(i), t))
+        assert_indexable::<I>(self.raw.len());
+        self.raw.into_iter().enumerate().map(enumerated_unchecked)
     }
 
     /// Creates a splicing iterator that replaces the specified range in the
@@ -326,7 +348,9 @@ impl<I: Idx, T> IndexVec<I, T> {
         &mut self,
         range: R,
     ) -> Enumerated<vec::Drain<'_, T>, I, T> {
-        self.raw.drain(range.into_range()).enumerate().map(|(i, t)| (I::from_usize(i), t))
+        let drain = self.raw.drain(range.into_range());
+        assert_indexable::<I>(drain.len());
+        drain.enumerate().map(enumerated_unchecked)
     }
 
     /// Gives the next index that will be assigned when `push` is

@@ -619,3 +619,54 @@ fn test_nonmax_with_attrs() {
     assert_eq!(idx.index(), 42);
     assert_eq!(idx.raw().get(), 42);
 }
+
+#[test]
+fn test_enumerated_full_range() {
+    // 256 elements is the most a `u8` index can address: indices `0..=255`.
+    let mut v: IndexVec<SmallChecked, u32> = IndexVec::from((0..256).collect::<Vec<u32>>());
+    assert!(v.iter_enumerated().all(|(i, x)| i.index() == *x as usize));
+    assert!(v.iter_mut_enumerated().all(|(i, x)| i.index() == *x as usize));
+    assert!(v.indices().map(SmallChecked::index).eq(0..256));
+    assert_eq!(v.drain_enumerated(..).next_back().map(|(i, x)| (i.index(), x)), Some((255, 255)));
+    let v: IndexVec<SmallChecked, u32> = IndexVec::from((0..256).collect::<Vec<u32>>());
+    assert_eq!(v.into_iter_enumerated().next_back().map(|(i, x)| (i.index(), x)), Some((255, 255)));
+
+    let empty: IndexVec<SmallChecked, u32> = IndexVec::new();
+    assert_eq!(empty.iter_enumerated().count(), 0);
+    assert_eq!(empty.indices().count(), 0);
+}
+
+#[test]
+#[should_panic]
+fn test_iter_enumerated_overflow() {
+    let v: IndexVec<SmallChecked, u32> = IndexVec::from(vec![0; 257]);
+    let _ = v.iter_enumerated();
+}
+
+#[test]
+#[should_panic]
+fn test_iter_mut_enumerated_overflow() {
+    let mut v: IndexVec<SmallChecked, u32> = IndexVec::from(vec![0; 257]);
+    let _ = v.iter_mut_enumerated();
+}
+
+#[test]
+#[should_panic]
+fn test_into_iter_enumerated_overflow() {
+    let v: IndexVec<SmallChecked, u32> = IndexVec::from(vec![0; 257]);
+    let _ = v.into_iter_enumerated();
+}
+
+#[test]
+#[should_panic]
+fn test_indices_overflow() {
+    let v: IndexVec<SmallChecked, u32> = IndexVec::from(vec![0; 257]);
+    let _ = v.indices();
+}
+
+#[test]
+fn test_drain_enumerated_subrange_of_oversized() {
+    // Only the drained range needs to be addressable.
+    let mut v: IndexVec<SmallChecked, u32> = IndexVec::from(vec![7; 300]);
+    assert_eq!(v.drain_enumerated(..SmallChecked::new(10)).count(), 10);
+}

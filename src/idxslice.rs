@@ -186,20 +186,24 @@ impl<I: Idx, T> IndexSlice<I, [T]> {
     /// `usize`.
     #[inline(always)]
     pub fn iter_enumerated(&self) -> Enumerated<slice::Iter<'_, T>, I, &T> {
-        self.raw.iter().enumerate().map(|(i, t)| (I::from_usize(i), t))
+        assert_indexable::<I>(self.raw.len());
+        self.raw.iter().enumerate().map(enumerated_unchecked)
     }
 
     /// Get an iterator over all our indices.
     #[inline(always)]
     pub fn indices(&self) -> iter::Map<Range<usize>, fn(usize) -> I> {
-        (0..self.raw.len()).map(I::from_usize)
+        assert_indexable::<I>(self.raw.len());
+        // SAFETY: `assert_indexable` checked that every `i` in `0..len` is valid for `I`.
+        (0..self.raw.len()).map(|i| unsafe { I::from_usize_unchecked(i) })
     }
 
     /// Similar to `self.iter_mut().enumerate()` but with indices of `I` and not
     /// `usize`.
     #[inline(always)]
     pub fn iter_mut_enumerated(&mut self) -> Enumerated<slice::IterMut<'_, T>, I, &mut T> {
-        self.raw.iter_mut().enumerate().map(|(i, t)| (I::from_usize(i), t))
+        assert_indexable::<I>(self.raw.len());
+        self.raw.iter_mut().enumerate().map(enumerated_unchecked)
     }
 
     /// Forwards to the slice's `sort` implementation.
